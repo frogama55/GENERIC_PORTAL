@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIT Portal Restyle 設定</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <h1>CIT Portal Restyle</h1>
+  <p class="note">千葉工大ポータルの見た目だけを変更する個人用拡張です。<br>データの外部送信は一切しません。</p>
+
+  <label class="row">
+    <input type="checkbox" id="enabled">
+    <span>見た目の改変を有効にする</span>
+  </label>
+
+  <label class="row">
+    <input type="checkbox" id="largeText">
+    <span>文字を少し大きくする</span>
+  </label>
+
+  <hr class="sep">
+
+  <label class="row">
+    <input type="checkbox" id="topPage">
+    <span>トップページを刷新<br><small>クイックランチャー＋スケジュール＋掲示に整理</small></span>
+  </label>
+
+  <hr class="sep">
+
+  <label class="row">
+    <input type="checkbox" id="attachInline">
+    <span>添付ファイルをブラウザ内で表示<br><small>DLせず閲覧。保存も可（ポータルからのみ取得・外部送信なし）</small></span>
+  </label>
+
+  <hr class="sep">
+
+  <label class="row">
+    <input type="checkbox" id="reloginButton">
+    <span>自動ログアウト画面に再ログインボタン<br><small>ログインページへ1クリックで移動（パスワードは保存しません）</small></span>
+  </label>
+
+  <hr class="sep">
+
+  <label class="row">
+    <input type="checkbox" id="smartBack">
+    <span>戻るボタンを直前ページへ<br><small>⚠ このポータルでは500エラーになるため非推奨（既定OFF）</small></span>
+  </label>
+
+  <p class="hint">「戻る」の変更は、切り替えたあとに開くページから反映されます（開いているタブは再読み込みしてください）。</p>
+
+  <script src="settings.js"></script>
+</body>
+</html>

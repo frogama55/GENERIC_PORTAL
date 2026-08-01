@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "GENERIC PORTAL",
+  "version": "0.1.0",
+  "description": "個人用拡張機能。個人情報保護のため、外部送信なし、読み取り専用であり、ローカルで動くようにしてあります。",
+  "content_scripts": [
+    {
+      "matches": ["https://portal.chibatech.ac.jp/uprx/*"],
+      "css": ["src/content/restyle.css"],
+      "js": [
+        "src/content/restyle.js",
+        "src/content/navfix.js",
+        "src/content/attachment.js",
+        "src/content/session.js",
+        "src/content/topage.js"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "src/panel/settings.html",
+    "default_title": "CIT Portal Restyle"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["https://portal.chibatech.ac.jp/uprx/*"]
+}

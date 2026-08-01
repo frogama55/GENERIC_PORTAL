@@ -1,0 +1,652 @@
+/*
+ * CIT Portal Restyle - 見た目改変の本体
+ *
+ * すべてのルールは html.cit-restyle 配下に限定する。
+ * → 設定OFFのときは html から cit-restyle クラスが外れ、素の見た目に戻る。
+ *
+ * 方針（フェーズ1）：
+ *   - 特定要素の狙い撃ちはせず、まずはフォント・余白・配色・幅など「土台」を整える。
+ *   - JSF/PrimeFaces 由来のクラス(.ui-*)は「あれば効く／なければ無視」で安全に当てる。
+ *   - 通信・DOM生成はしない。純粋なCSSのみ。
+ */
+
+/* ===== ベースタイポグラフィ ===== */
+html.cit-restyle body {
+  font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif !important;
+  line-height: 1.6 !important;
+  color: #1f2933 !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 文字を少し大きく（設定 largeText 用） */
+html.cit-restyle.cit-restyle-large body {
+  font-size: 16px !important;
+}
+
+/* ===== リンク・見出しの視認性 ===== */
+html.cit-restyle a {
+  color: #1558b0 !important;
+}
+html.cit-restyle a:hover {
+  text-decoration: underline !important;
+}
+html.cit-restyle h1,
+html.cit-restyle h2,
+html.cit-restyle h3 {
+  line-height: 1.35 !important;
+  letter-spacing: 0.01em;
+}
+
+/* ===== 余白・行間のゆとり ===== */
+html.cit-restyle td,
+html.cit-restyle th {
+  padding: 8px 10px !important;
+}
+html.cit-restyle p,
+html.cit-restyle li {
+  line-height: 1.7 !important;
+}
+
+/* ===== テーブルの可読性（縞・境界・ヘッダ固定色） ===== */
+html.cit-restyle table {
+  border-collapse: collapse !important;
+}
+html.cit-restyle table tr:nth-child(even) > td {
+  background-color: #f6f8fa !important;
+}
+html.cit-restyle table td,
+html.cit-restyle table th {
+  border-color: #dfe3e8 !important;
+}
+html.cit-restyle th {
+  background-color: #eef2f6 !important;
+  color: #1f2933 !important;
+}
+
+/* ===== フォーム部品の当たり判定・見た目 ===== */
+html.cit-restyle input[type="text"],
+html.cit-restyle input[type="password"],
+html.cit-restyle input[type="search"],
+html.cit-restyle select,
+html.cit-restyle textarea {
+  padding: 6px 8px !important;
+  border: 1px solid #c3cad3 !important;
+  border-radius: 6px !important;
+  background: #fff !important;
+}
+html.cit-restyle input:focus,
+html.cit-restyle select:focus,
+html.cit-restyle textarea:focus {
+  outline: 2px solid #1558b0 !important;
+  outline-offset: 1px;
+}
+
+/* ===== ボタン（汎用 + PrimeFaces .ui-button があれば） ===== */
+html.cit-restyle button,
+html.cit-restyle input[type="button"],
+html.cit-restyle input[type="submit"],
+html.cit-restyle .ui-button {
+  border-radius: 6px !important;
+  cursor: pointer;
+}
+
+/* ===== PrimeFaces パネル（存在すれば角丸・境界を整える） ===== */
+html.cit-restyle .ui-panel,
+html.cit-restyle .ui-widget-content {
+  border-radius: 8px !important;
+}
+
+/* ===== 掲示一覧（Bsd00701）をカード表示で見やすく =====
+ * 1掲示の構造：
+ *   div.alignRight               … 1件のラッパ
+ *     dl.keiji                   … カテゴリ(span.keijiCategory) + タイトル(a.ui-commandlink) + 日付(テキスト)
+ *     span.inlineBlock           … 操作ボタン（フラグ/既読）※想定
+ *     div.cf / hr.ui-separator   … 装飾（カード化で不要）
+ * → ラッパをカード＆横1行(flex)にして、タイトル行と操作ボタンを同じ行に収める。
+ *   タイトルが長い場合は … で省略。重要/新着は i.iconColor*（表示時は hiddenStyle が外れる）。
+ */
+
+/* ラッパ＝カード。dl.keiji を直下に持つ .alignRight だけを対象にする */
+html.cit-restyle div.alignRight:has(> dl.keiji) {
+  display: flex !important;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 12px;
+  box-sizing: border-box;
+  margin: 0 0 8px !important;
+  padding: 8px 14px !important;
+  background: #fff !important;
+  border: 1px solid #e1e6ea !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06) !important;
+}
+
+/* clearfix と区切り線はカード化で不要 */
+html.cit-restyle div.alignRight:has(> dl.keiji) > .cf,
+html.cit-restyle dl.keiji ~ hr.ui-separator {
+  display: none !important;
+}
+
+/* タイトル行：カテゴリ＋タイトル＋日付を横並びにし、空きを占有 */
+html.cit-restyle dl.keiji {
+  display: flex !important;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 auto;
+  float: none !important;
+  width: auto !important;
+  margin: 0 !important;
+  line-height: 1.6 !important;
+  color: #52606d; /* 日付テキスト(dl直下)の色。タイトル・カテゴリは各自で上書き */
+}
+
+/* カテゴリをバッジ表示（縮まない） */
+html.cit-restyle .keiji .keijiCategory {
+  flex: 0 0 auto;
+  display: inline-block !important;
+  padding: 2px 10px !important;
+  border-radius: 999px !important;
+  background: #3b4a5a !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+}
+
+/* タイトル：伸びて空きを埋め、長い場合は … で1行省略
+ * 太さ・色は既読/未読で分ける（未読はタイトルに fontBold が付く） */
+html.cit-restyle .keiji a.ui-commandlink {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px !important;
+}
+html.cit-restyle.cit-restyle-large .keiji a.ui-commandlink {
+  font-size: 16px !important;
+}
+
+/* 未読（fontBold あり）：太字＋濃い色でしっかり目立たせる */
+html.cit-restyle .keiji a.ui-commandlink.fontBold {
+  font-weight: 700 !important;
+  color: #0b3d91 !important;
+}
+
+/* 既読（fontBold なし）：通常太さ＋控えめグレーで後退させる */
+html.cit-restyle .keiji a.ui-commandlink:not(.fontBold) {
+  font-weight: 400 !important;
+  color: #6b7480 !important;
+}
+
+/* 重要アイコン（！）は残す（縮まない・余白詰め） */
+html.cit-restyle .keiji i.iconColorAttention {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+/* 新着の電球アイコンは意味が分かりにくいので非表示（新着の視覚表示は廃止） */
+html.cit-restyle .keiji i.iconColorNew {
+  display: none !important;
+}
+
+/* 操作ボタン（フラグ/既読）をカード右側へ。縮小させない */
+html.cit-restyle div.alignRight:has(> dl.keiji) > .inlineBlock {
+  flex: 0 0 auto;
+  margin: 0 !important;
+}
+
+/* 重要（赤！アイコン表示）→ 赤帯＋淡背景 */
+html.cit-restyle div.alignRight:has(> dl.keiji):has(i.iconColorAttention:not(.hiddenStyle)) {
+  border-left: 4px solid #d64545 !important;
+  background: #fff8f7 !important;
+}
+
+/* ===== 既読 / 未読の見分け =====
+ * 未読はタイトル(dl.keiji 直下の a)に fontBold が付く。
+ * ボタン(フラグ/既読)のリンクを誤検出しないよう、判定は dl.keiji 直下の a に限定する。
+ */
+
+/* カード先頭に丸ドットの枠を常に確保（既読は透明・未読は青） */
+html.cit-restyle div.alignRight:has(> dl.keiji)::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+}
+html.cit-restyle div.alignRight:has(> dl.keiji):has(dl.keiji > a.ui-commandlink.fontBold)::before {
+  background: #2f9e6f;
+}
+
+/* 既読カードは背景を少し落として後退させる（重要/新着の背景より後に置いて優先） */
+html.cit-restyle div.alignRight:has(> dl.keiji):has(dl.keiji > a.ui-commandlink:not(.fontBold)) {
+  background: #f2f4f6 !important;
+}
+
+/* ===== 掲示タブの絞り込み・改名 =====
+ * タブは #funcForm:tabArea > ul.ui-tabs-nav > li。現状の並び（左から）：
+ *   1 グループ / 2 全表示 / 3 授業 / 4 時間割変更 / 5 既読 / 6 未読 / 7 新着 / 8 重要 / 9 申込 / 10 フラグつき
+ * 残すのは 1 グループ・2 全表示・6 未読・8 重要・10 フラグつき。他は非表示にする。
+ * （8 重要は、トップの掲示「もっと見る」の飛び先として復活させた）
+ */
+
+/* タブ帯の黒い背景を白くする（タブ本体の帯・その周囲とも） */
+html.cit-restyle #funcForm\:tabArea,
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav {
+  background: #fff !important;
+  border-color: #dfe3e8 !important;
+}
+
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(3),
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(4),
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(5),
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(7),
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(9) {
+  display: none !important;
+}
+
+/* 「全表示」→「掲示一覧」に表示名だけ差し替え。
+ * 元テキストを color:transparent で不可視化しつつ幅（≒4文字）は維持し、
+ * ::before を重ねて中央に新ラベルを表示する。
+ * ※ font-size:0 だとタブの em 指定パディングまで潰れて崩れるため、この方式にする。 */
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(2) > a {
+  position: relative;
+  color: transparent !important;
+  white-space: nowrap;
+}
+html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li:nth-child(2) > a::before {
+  content: "掲示一覧";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1558b0 !important;
+}
+
+/* ===== 並び順ツールバーを丸ごと非表示 =====
+ * 各タブパネル内の div.squeezeArea（並び順ラベル＋ドロップダウン＋各ボタン）が対象。 */
+html.cit-restyle .ui-tabs-panels .squeezeArea {
+  display: none !important;
+}
+
+/* ===== 検索エリアの簡素化・中央寄せ（掲示一覧ページ限定！） =====
+ * div.searchArea 内：入力欄 dl.searchItem ＋ 検索ボタン span.btnSearchLocation。
+ * ※ 他ページにも .searchArea があるため、掲示一覧の検索欄（#funcForm:keyword を含むもの）
+ *   だけに限定する（:has で絞る）。これを怠ると他ページの検索ボタンまで消えてしまう。
+ * ボタン非表示に伴う検索実行は restyle.js の Enter ハンドラで担保する。 */
+html.cit-restyle div.searchArea:has(#funcForm\:keyword) .btnSearchLocation {
+  display: none !important;
+}
+html.cit-restyle div.searchArea:has(#funcForm\:keyword) {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* 「授業科目」欄（ラベル dt.searchItemCell ＋ 入力 dd）は不要なので非表示（掲示一覧限定）。
+ * キーワード欄(funcForm:keyword)だけ残す。キーワード側の dt は無クラスなので誤爆しない。 */
+html.cit-restyle div.searchArea:has(#funcForm\:keyword) dt.searchItemCell,
+html.cit-restyle div.searchArea:has(#funcForm\:keyword) dd:has(#funcForm\:jugyoKamoku) {
+  display: none !important;
+}
+
+/* 復活した検索ボタン（黄色い btnAltColorSearch）を拡張のテーマ色（青）に合わせる。
+ * 掲示一覧ページのものは上で非表示なので影響なし。他ページの検索ボタンが対象。 */
+html.cit-restyle .btnSearch,
+html.cit-restyle .btnSearch.btnAltColorSearch {
+  background: #1558b0 !important;
+  background-image: none !important;
+  border-color: #1558b0 !important;
+  color: #fff !important;
+}
+html.cit-restyle .btnSearch .ui-button-text {
+  color: #fff !important;
+}
+html.cit-restyle .btnSearch:hover,
+html.cit-restyle .btnSearch:focus {
+  background: #0d3f85 !important;
+  border-color: #0d3f85 !important;
+}
+
+/* ===== 時間割ページ（Kmd00801）の時間割グリッドをコンパクトに =====
+ * table.classTable は時間割ページ固有。曜日(thead th.headerYobi)×時限(tbody tr, 左端 td.colJigen)。
+ * 1コマ = td.colYobi > div.jugyo-info（fontB=教科名 / div=教員 / div=講義室 / taniSu=単位 /
+ * sign=複数回等 / シラバスボタン）。教科名・教員・講義室・シラバスだけに圧縮する。 */
+
+/* 内側スクロール枠(.ofAuto)の高さ固定を解除して全体を表示 */
+html.cit-restyle .rishuArea .ofAuto {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* 表全体をコンパクト＆全幅・等幅列 */
+html.cit-restyle table.classTable {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: collapse !important;
+  font-size: 11px !important;
+}
+html.cit-restyle table.classTable th.headerYobi {
+  padding: 3px 2px !important;
+  font-size: 11px !important;
+  text-align: center !important;
+}
+html.cit-restyle table.classTable th.headerJigen,
+html.cit-restyle table.classTable td.colJigen {
+  width: 3.8em !important;
+}
+
+/* 左端の時限ラベル：元の番号を font-size:0 で隠し、「N限 / HH:00」を自前で表示する。
+ * （元の番号とCSSの時刻が重なって文字化けしていたため、丸ごと自前表示に切替） */
+html.cit-restyle table.classTable td.colJigen {
+  text-align: center !important;
+  vertical-align: middle !important;
+  background: #eef2f6 !important;
+  padding: 2px !important;
+  white-space: pre-line !important;
+  font-size: 0 !important;
+}
+html.cit-restyle table.classTable td.colJigen::after {
+  color: #1f2933;
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.35;
+}
+/* ※ content の "\A " は改行。\A の直後にスペースを入れて16進エスケープを終端すること。
+ *   スペースが無いと \A9 が © (U+00A9) 等の16進エスケープと解釈され文字化けする。 */
+html.cit-restyle table.classTable tbody tr:nth-child(1) td.colJigen::after { content: "1限\A 9:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(2) td.colJigen::after { content: "2限\A 10:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(3) td.colJigen::after { content: "3限\A 11:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(4) td.colJigen::after { content: "4限\A 12:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(5) td.colJigen::after { content: "5限\A 13:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(6) td.colJigen::after { content: "6限\A 14:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(7) td.colJigen::after { content: "7限\A 15:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(8) td.colJigen::after { content: "8限\A 16:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(9) td.colJigen::after { content: "9限\A 17:00"; }
+html.cit-restyle table.classTable tbody tr:nth-child(10) td.colJigen::after { content: "10限\A 18:00"; }
+
+/* 授業セル：上寄せ・詰めた余白・白背景＋罫線 */
+html.cit-restyle table.classTable td.colYobi {
+  vertical-align: top !important;
+  padding: 2px 3px !important;
+  background: #fff !important;
+  border: 1px solid #dfe3e8 !important;
+}
+
+/* コマ内：単位・複数回/定員有 のバッジを隠す（教科名・教員・講義室・シラバスだけ残す） */
+html.cit-restyle table.classTable .jugyo-info .taniSu,
+html.cit-restyle table.classTable .jugyo-info .sign {
+  display: none !important;
+}
+html.cit-restyle table.classTable .jugyo-info {
+  line-height: 1.15 !important;
+}
+/* 教科名：太字・最大2行で省略（高さを詰める） */
+html.cit-restyle table.classTable .jugyo-info .fontB {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  margin-bottom: 1px !important;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+/* 教員・講義室（＋ボタン行）は1行に省略。講義室のキャンパス名は … で切れて省スペース化 */
+html.cit-restyle table.classTable .jugyo-info > div:not(.fontB):not(.taniSu):not(.sign) {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+/* シラバスボタン（アイコンのみ）を小さく右寄せ */
+html.cit-restyle table.classTable .jugyo-info .noTextIconLine {
+  margin-top: 0 !important;
+}
+html.cit-restyle table.classTable .jugyo-info .noTextIconLine button {
+  padding: 0 3px !important;
+  min-width: 0 !important;
+  height: 18px !important;
+  line-height: 16px !important;
+}
+
+/* ===== スクロールバーを細く控えめに ===== */
+html.cit-restyle ::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+html.cit-restyle ::-webkit-scrollbar-thumb {
+  background: #c3cad3;
+  border-radius: 6px;
+}
+
+/* ===== 添付ファイルのプレビュー用オーバーレイ（attachment.js が生成） =====
+ * 拡張が作る自前UIなので .cit-restyle スコープ外（常に適用）。 */
+.cit-pdf-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  background: rgba(15, 23, 32, 0.6);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.cit-pdf-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: #1f2933;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px 8px 0 0;
+}
+.cit-pdf-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cit-pdf-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.cit-pdf-btn {
+  font: inherit;
+  font-size: 13px;
+  color: #1f2933;
+  background: #fff;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.6;
+}
+.cit-pdf-btn:hover {
+  background: #eef2f6;
+}
+.cit-pdf-frame {
+  flex: 1 1 auto;
+  width: 100%;
+  border: none;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ===== トップページのクイックランチャー（topage.js が生成） =====
+ * 元メニューを代理クリックするアイコンボタン群。拡張生成UIなので常時スタイルする。 */
+.cit-quicklaunch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  padding: 14px;
+  margin: 0 0 14px;
+  background: #fff;
+  border: 1px solid #e1e6ea;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+.cit-ql-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 96px;
+  padding: 12px 14px;
+  background: #f6f8fa;
+  border: 1px solid #d9dee3;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #1f2933;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+}
+.cit-ql-btn:hover {
+  background: #e9eef3;
+  border-color: #1558b0;
+}
+.cit-ql-btn .fa {
+  font-size: 22px;
+  color: #1558b0;
+  line-height: 1;
+}
+.cit-ql-label {
+  line-height: 1.2;
+}
+
+/* ===== トップページ刷新（html.cit-top）＝ ランチャー＋スケジュール＋掲示 に整理 =====
+ * トップ判定は topage.js が中身(#mainWrapBottomPortal)で行い html に cit-top を付与。
+ * 動的な j_idtNNN は避け、安定した id/class で狙う。 */
+
+/* 左カラム（インフォメーションのアイコン群・リンク）を隠す */
+html.cit-top .portalSub {
+  display: none !important;
+}
+
+/* スケジュール（右カラム）を全幅に広げる */
+html.cit-top .portalMain {
+  width: 100% !important;
+  float: none !important;
+  margin: 0 !important;
+}
+
+/* 掲示（#portalSupport）＝左、スケジュール（#portalCont）＝右 の2カラム。
+ * 画面が狭いときは flex-wrap で縦積みに戻る。 */
+html.cit-top #mainWrapBottomPortal {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+html.cit-top #mainWrapBottomPortal > #portalSupport {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+html.cit-top #mainWrapBottomPortal > #portalCont {
+  flex: 2 1 420px;
+  min-width: 0;
+}
+
+/* 掲示（重要/期限ありボックス）は先頭5件までに絞る */
+html.cit-top #portalSupport ul.ui-datalist-data > li.ui-datalist-item:nth-child(n + 6) {
+  display: none !important;
+}
+
+/* ===== トップページのスケジュールをコンパクトな縦リストに =====
+ * 横並びは狭くなると文字が被るため、縦に詰めて表示する。 */
+html.cit-top #portalSchedule2 ul.ui-datalist-data {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html.cit-top #portalSchedule2 ul.ui-datalist-data > li.ui-datalist-item {
+  margin: 0 0 6px !important;
+  padding: 0 !important;
+  list-style: none;
+}
+html.cit-top #portalSchedule2 .lessonArea .ui-panel-content {
+  padding: 8px 12px !important;
+}
+/* 授業メモの編集欄は省スペースのため画面外へ（見えなくするが要素は残す）。
+ * ※ display:none にすると、サイトの「変更チェック(collectData)」の集計対象から外れ、
+ *    初期スナップショット(initData)とズレて「編集中」誤判定→確認ダイアログが出る。
+ *    そのため display:none ではなく、集計対象に残る「画面外へ飛ばす」方式にする。 */
+html.cit-top #portalSchedule2 .lessonMemoArea {
+  position: absolute !important;
+  left: -99999px !important;
+  top: 0 !important;
+  width: 300px !important;
+}
+
+/* クラスプロファイルボタン（.cpBtn）を非表示 */
+html.cit-top #portalSchedule2 .lessonBtnArea .cpBtn {
+  display: none !important;
+}
+
+/* 残った「シラバス照会」ボタンの表記を「シラバス」に短縮（幅も詰める） */
+html.cit-top #portalSchedule2 .lessonBtnArea button:not(.cpBtn) .ui-button-text {
+  font-size: 0 !important;
+  padding: 4px 10px !important;
+}
+html.cit-top #portalSchedule2 .lessonBtnArea button:not(.cpBtn) .ui-button-text::after {
+  content: "シラバス";
+  font-size: 13px !important;
+}
+
+/* 教員（p）／ 教室（div）を1行にまとめる */
+html.cit-top #portalSchedule2 .lessonDetail > p,
+html.cit-top #portalSchedule2 .lessonDetail > div {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+html.cit-top #portalSchedule2 .lessonDetail > div::before {
+  content: " ／ ";
+  color: #9aa5b1;
+}
+
+/* 自前の「もっと見る（重要一覧へ）」リンク（topage.js が設置） */
+.cit-keiji-more {
+  display: inline-block;
+  margin: 6px 0 2px;
+  color: #1558b0 !important;
+  font-weight: 600;
+  text-decoration: none;
+}
+.cit-keiji-more:hover {
+  text-decoration: underline;
+}
+
+/* ===== 自動ログアウト画面の「ログインページへ」ボタン（session.js が生成） ===== */
+.cit-relogin-wrap {
+  text-align: center;
+  margin: 18px 0 4px;
+}
+.cit-relogin-btn {
+  display: inline-block;
+  background: #1558b0;
+  color: #fff !important;
+  text-decoration: none !important;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.2);
+}
+/* 共通のリンク色ルール（html.cit-restyle a）に負けないよう、白を高詳細度で明示 */
+html.cit-restyle a.cit-relogin-btn,
+a.cit-relogin-btn {
+  color: #fff !important;
+}
+.cit-relogin-btn:hover {
+  background: #0d3f85 !important;
+}
