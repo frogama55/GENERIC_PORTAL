@@ -24,6 +24,7 @@
   const AUTO_EXPAND_KEIJI = true;
 
   const ITEMS = [
+    { label: "掲示", menuText: "掲示板", icon: "fa-bullhorn" },
     { label: "時間割", menuText: "学生時間割表", icon: "fa-table" },
     { label: "出欠", menuText: "出欠状況確認", icon: "fa-check-square-o" },
     { label: "成績", menuText: "成績照会", icon: "fa-graduation-cap" },
