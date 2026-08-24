@@ -13,7 +13,8 @@
         "src/content/attachment.js",
         "src/content/session.js",
         "src/content/topage.js",
-        "src/content/grades.js"
+        "src/content/grades.js",
+        "src/content/attendance.js"
       ],
       "run_at": "document_start"
     }

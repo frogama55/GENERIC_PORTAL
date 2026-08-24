@@ -723,3 +723,119 @@ a.cit-relogin-btn {
   top: 0 !important;
   width: 600px !important;
 }
+
+/* ===== 出欠状況確認（Atb005）の表 =====
+ * 元の作り：本物の表1つ（.scroll_div.attendanceInfo）＋ 固定ヘッダ/固定列を再現するための
+ * 複製3つ（.fixed_header_display_none_at_print）を重ね、JSでスクロールを同期している。
+ * これが「左右で縦スクロールの感触が違う」「1回まで固定される」「◯と日付がズレる」
+ * 「ズームが変」の原因。→ 複製を隠し、本物の内部スクロールをやめて、
+ * ブラウザ標準の position:sticky で固定し直す。 */
+
+/* 1) 複製テーブルを隠す（絶対配置なのでレイアウトには影響しない）。
+ * ※ visibility:hidden は不可。このサイトには `* { visibility: visible !important }` という
+ *   CSSがあり、親を hidden にしても子要素が強制的に表示され複製ヘッダが浮いて残る。
+ *   display:none なら子要素から復活できない。表示専用の複製で入力欄も無いので安全。 */
+/* ※ このクラスは div(.scroll_div) にも table にも付く（サイトのJSが複製を作り直すと
+ *   付く場所が変わる）。どちらでも消えるよう、自身と子孫の両方を対象にする。 */
+html.cit-restyle .scroll_div.attendanceInfo.fixed_header_display_none_at_print,
+html.cit-restyle .attendanceInfo .fixed_header_display_none_at_print {
+  display: none !important;
+}
+
+/* 2) 本物：内部スクロールをやめてページのスクロールに一本化（ズーム対応も自然になる） */
+html.cit-restyle .scroll_div.attendanceInfo:not(.fixed_header_display_none_at_print) {
+  overflow: visible !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* 3) この表では縞模様を白で打ち消す。
+ * ※ 詳細度の設計が要注意。この指定は (0,3,4)：
+ *    - 全体の縞模様 (0,2,3) には勝つ
+ *    - 固定列の白背景 (0,3,4・後方に記述) には負ける → 固定列は不透明を保てる
+ *    - 状態色 td.height:has(...) (0,4,2) には負ける → 出席/欠席/休講の色が残る
+ *   `td:nth-child(n+3)` のように条件を足すと状態色に勝ってしまい色が消えるので付けないこと。
+ *   `transparent` にすると固定列が透けるので白で塗ること。 */
+html.cit-restyle .attendanceInfo table tr:nth-child(even) > td {
+  background-color: #fff !important;
+}
+
+/* 4) ヘッダ行を上に固定 */
+html.cit-restyle .attendanceInfo table thead th {
+  position: sticky !important;
+  top: 0;
+  z-index: 3;
+  background: #eef2f6 !important;
+}
+
+/* 5) 「曜日時限」「授業科目」だけを左に固定（1回以降は横スクロールする） */
+html.cit-restyle .attendanceInfo table tr > th:nth-child(1),
+html.cit-restyle .attendanceInfo table tr > td:nth-child(1) {
+  position: sticky !important;
+  left: 0;
+  z-index: 2;
+  width: 6.5em !important;
+  min-width: 6.5em !important;
+  background: #fff !important;
+}
+html.cit-restyle .attendanceInfo table tr > th:nth-child(2),
+html.cit-restyle .attendanceInfo table tr > td:nth-child(2) {
+  position: sticky !important;
+  left: 6.5em;
+  z-index: 2;
+  width: 24em !important;
+  min-width: 24em !important;
+  background: #fff !important;
+}
+/* 固定ヘッダと固定列が交差する左上は最前面に */
+html.cit-restyle .attendanceInfo table thead th:nth-child(1),
+html.cit-restyle .attendanceInfo table thead th:nth-child(2) {
+  z-index: 4;
+  background: #eef2f6 !important;
+}
+
+/* 6) 出欠セル：日付とマークを中央揃えで縦に並べる。
+ * ※ td に display:flex を指定すると「表のセル」でなくなり行が崩れるため、
+ *   attendance.js が中身を div.cit-att-cell で包み、そのラッパを flex にする。
+ *   ラッパ内は「日付 → マーク」の順に並べ替え済み。 */
+html.cit-restyle .attendanceInfo td.height {
+  text-align: center !important;
+  vertical-align: middle !important;
+  padding: 4px 2px !important;
+}
+html.cit-restyle .attendanceInfo .cit-att-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+html.cit-restyle .attendanceInfo .cit-att-cell > p.jugyoDate {
+  margin: 0 !important;
+  font-size: 11px !important;
+  line-height: 1.25 !important;
+  color: #52606d !important;
+  white-space: nowrap;
+}
+html.cit-restyle .attendanceInfo .cit-att-cell > .jugyoList {
+  display: block !important;
+  background: transparent !important;
+  line-height: 1.2 !important;
+  padding: 0 !important;
+}
+html.cit-restyle .attendanceInfo .syuketsuKbnMark {
+  font-size: 17px !important;
+  line-height: 1.1 !important;
+}
+
+/* 7) 状態の色は「浮いた四角」ではなくセル全体に敷く
+ * （ラッパで包んだので直下ではなく子孫として判定する） */
+html.cit-restyle .attendanceInfo td.height:has(.attendance) {
+  background: #e8f5e9 !important;
+}
+html.cit-restyle .attendanceInfo td.height:has(.absence) {
+  background: #fdecec !important;
+}
+html.cit-restyle .attendanceInfo td.height:has(.nolecture) {
+  background: #f1f3f5 !important;
+}

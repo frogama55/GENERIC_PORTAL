@@ -237,6 +237,39 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
   隠し方は `display:none` ではなく `.cit-grade-hidden`（画面外送り）。display:none だと
   変更チェック(collectData)の対象から外れ「編集中」誤判定が出るリスクがあるため（メモ欄と同じ理由）。
 
+### 出欠状況確認ページ `Atb005`
+
+- **元の作り（重要）**：PrimeFaces標準の frozen columns ではなく独自実装。
+  `div.scroll_div.ui-datatable.attendanceInfo.wrapper` が**4つ**あり、
+  - 1つ目（`fixed_header_display_none_at_print` が**付かない**）＝**本物**の表。
+    `overflow: auto/auto`, `height:453px`, 全列（曜日時限/授業科目/1回〜13回）を持つ。
+  - 残り3つ（`fixed_header_display_none_at_print` 付き・`position:absolute`）＝
+    固定ヘッダ・固定列・左上角を再現するための**複製**。JSでスクロールを同期している。
+  - これが「左右で縦スクロールの感触が違う」「1回まで固定される」「◯と日付がズレる」
+    「ズームが変」の原因。
+- 出欠セル：`td.height.colSizeFixed.alignCenter` >
+  `span.jugyoList`（状態クラス `attendance`＝出席 / `absence`＝欠席 / `nolecture`＝休講）
+  > `span.syuketsuKbnMark`（〇×休 等）＋ `p.jugyoDate`（MM/DD）。
+  **DOM順はマーク→日付**（画面では日付が上に見えるのはCSSによる）。色は元々 span 側に付く。
+- 複製の目印 `fixed_header_display_none_at_print` は **`div.scroll_div` にも `<table>` にも付く**
+  （サイトのJSが再生成すると付く場所が変わる。table 側は `position:fixed` で画面上部に浮く）。
+  どちらでも消えるよう、自身と子孫の両方を指定すること。
+- 実装（restyle.css）：複製を **`display:none`**（※`visibility:hidden` は不可。サイトに
+  `* { visibility: visible !important }` があり子要素が強制表示されて複製ヘッダが浮いて残る）、
+  本物の内部スクロールを解除
+  （`overflow:visible; height:auto`）してページのスクロールに一本化し、
+  `thead th` を `position:sticky; top:0`、1〜2列目（曜日時限・授業科目）を
+  `position:sticky; left:0 / 6.5em` で固定。**1回以降は横スクロールする**（列移動は不要になった）。
+  セルは attendance.js が中身を `div.cit-att-cell` で包み（「日付→マーク」の順に並べ替え）、
+  そのラッパを flex 縦中央揃えにする。色は `td.height:has(.attendance|.absence|.nolecture)` で
+  セル全体に敷く。
+  **【重要な落とし穴】`td` に `display:flex` を指定すると、そのセルが表の一部でなくなり
+  行が崩れて全セルが縦積みになる。td は table-cell のまま、必ずラッパを挟むこと。**
+- 実装（attendance.js）：日付に曜日を付ける（`04/13` → `04/13(月)`）。
+  「開講年度学期」の年度＋MM/DD から曜日を計算（後期の1〜3月は翌年扱い）。
+  算出できない場合は行の「曜日時限」の曜日で代用。`p.dataset.citWd` で二重付与を防止。
+- 状態クラスは実機で確認済み：`attendance`(〇) / `absence`(×) / `nolecture`(休) の3種のみ。
+
 ### 自動ログアウト画面（セッション切れ）
 
 - 一定時間無操作で自動ログアウトされると、URLは `.../pk/pky001/Pky00102.xhtml`（＝通常のトップと
