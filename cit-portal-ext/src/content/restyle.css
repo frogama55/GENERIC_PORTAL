@@ -580,7 +580,7 @@ html.cit-top #portalSchedule2 .lessonArea .ui-panel-content {
  * ※ display:none にすると、サイトの「変更チェック(collectData)」の集計対象から外れ、
  *    初期スナップショット(initData)とズレて「編集中」誤判定→確認ダイアログが出る。
  *    そのため display:none ではなく、集計対象に残る「画面外へ飛ばす」方式にする。 */
-html.cit-top #portalSchedule2 .lessonMemoArea {
+html.cit-top .lessonMemoArea {
   position: absolute !important;
   left: -99999px !important;
   top: 0 !important;
@@ -705,4 +705,14 @@ a.cit-relogin-btn {
   left: -99999px !important;
   top: 0 !important;
   width: 1000px !important;
+}
+
+/* まとめた連続コマの2つ目以降を隠す（topage.js の mergeLessons が付与）。
+ * display:none だとメモ欄が変更チェック(collectData)の対象から外れて
+ * 「編集中」誤判定が出るため、画面外送りで隠す。 */
+.cit-lesson-merged {
+  position: absolute !important;
+  left: -99999px !important;
+  top: 0 !important;
+  width: 600px !important;
 }

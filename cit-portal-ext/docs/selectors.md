@@ -164,6 +164,10 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
     `button.cpBtn`。→ `.cpBtn` を非表示、`button:not(.cpBtn) .ui-button-text` を font-size:0＋
     `::after{content:"シラバス"}` で短縮。
   - `.lessonDetail` = `<p>`（教員）＋`<div>`（教室）→ inline化＋`div::before{content:" ／ "}` で1行。
+  - 同じ授業が1時間ごとに別コマとして並ぶため、`mergeLessons()`（topage.js）で
+    「授業名＋教員/教室」が同じかつ**前コマの終了＝次コマの開始**で連続するものをまとめる。
+    先頭コマの `.lessonHead` 内の「HH:MM - HH:MM」の終了時刻だけ書き換え、後続 `li` に
+    `.cit-lesson-merged`（画面外送り）を付ける。処理済みは `li.dataset.citLesson` で判定（再描画対応）。
   - `.lessonMemoArea` 内は memo input（`input.dispJugyoMemo`, `ctrl-checkModify`）＋登録button。
     ※【重要】メモ欄を `display:none` にすると「編集中」確認ダイアログが離脱時に誤発生する。
     仕組み：`confirmIfModified`→`isModified()` が `initData !== collectData()` で判定。メモを

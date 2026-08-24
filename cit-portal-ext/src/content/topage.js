@@ -166,12 +166,84 @@
     }
   }
 
+  // ---- その日のスケジュール：同じ授業が連続するコマを1つにまとめる ----
+  // 例）09:00-10:00 と 10:00-11:00 が同じ授業なら、先頭を「09:00 - 11:00」にして後続を隠す。
+
+  const TIME_RE = /(\d{1,2}:\d{2})(\s*[-–—~〜]\s*)(\d{1,2}:\d{2})/;
+
+  // 授業の同一性は「授業名＋教員/教室」で判定する
+  function lessonKey(li) {
+    const norm = (e) => (e ? e.textContent.replace(/\s+/g, "") : "");
+    return norm(li.querySelector(".lessonTitle")) + "|" + norm(li.querySelector(".lessonDetail"));
+  }
+
+  function lessonTime(li) {
+    const head = li.querySelector(".lessonHead");
+    const m = head && head.textContent.match(TIME_RE);
+    return m ? { start: m[1], end: m[3] } : null;
+  }
+
+  // .lessonHead 内の「HH:MM - HH:MM」の終了時刻だけ書き換える。
+  // 開始と終了が別要素に分かれている場合（1つのテキストノードに揃っていない場合）にも対応する。
+  function setLessonEnd(li, end) {
+    const head = li.querySelector(".lessonHead");
+    if (!head) return;
+    const w = document.createTreeWalker(head, NodeFilter.SHOW_TEXT);
+    const timeNodes = [];
+    let n;
+    while ((n = w.nextNode())) {
+      if (TIME_RE.test(n.nodeValue)) {
+        // 1つのノードに「開始 - 終了」が揃っている場合
+        n.nodeValue = n.nodeValue.replace(TIME_RE, (m, a, sep) => a + sep + end);
+        return;
+      }
+      if (/\d{1,2}:\d{2}/.test(n.nodeValue)) timeNodes.push(n);
+    }
+    // 分かれている場合は、最後に出てくる時刻＝終了時刻とみなして置き換える
+    const lastNode = timeNodes[timeNodes.length - 1];
+    if (lastNode) {
+      lastNode.nodeValue = lastNode.nodeValue.replace(
+        /(\d{1,2}:\d{2})(?![\s\S]*\d{1,2}:\d{2})/,
+        end
+      );
+    }
+  }
+
+  function mergeLessons() {
+    const box = document.getElementById("portalSchedule2");
+    if (!box) return;
+    const items = [...box.querySelectorAll("li.ui-datalist-item")];
+    if (items.length < 2) return;
+    if (!items.some((li) => !li.dataset.citLesson)) return; // 全て処理済みなら何もしない
+
+    let i = 0;
+    while (i < items.length) {
+      const head = items[i];
+      const first = lessonTime(head);
+      const key = lessonKey(head);
+      let last = first;
+      let j = i + 1;
+      // 同じ授業が「前のコマの終了＝次のコマの開始」で続く限りまとめる
+      while (j < items.length && first && last) {
+        const t = lessonTime(items[j]);
+        if (lessonKey(items[j]) !== key || !t || t.start !== last.end) break;
+        last = t;
+        items[j].classList.add("cit-lesson-merged");
+        j++;
+      }
+      if (first && last && last.end !== first.end) setLessonEnd(head, last.end);
+      for (let k = i; k < j; k++) items[k].dataset.citLesson = "1";
+      i = j;
+    }
+  }
+
   function tick() {
     if (!enabled) return;
     markTop();
     buildBar();
     if (document.documentElement.classList.contains("cit-top")) {
       handleTopBulletins();
+      mergeLessons();
     }
     activateKeijiTabIfFlagged();
   }
