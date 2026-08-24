@@ -580,7 +580,14 @@ html.cit-top #portalSchedule2 .lessonArea .ui-panel-content {
  * ※ display:none にすると、サイトの「変更チェック(collectData)」の集計対象から外れ、
  *    初期スナップショット(initData)とズレて「編集中」誤判定→確認ダイアログが出る。
  *    そのため display:none ではなく、集計対象に残る「画面外へ飛ばす」方式にする。 */
-html.cit-top .lessonMemoArea {
+/* メモ欄は「囲み(.lessonMemoArea)」が無く、入力欄 input.dispJugyoMemo が div.lessonMain の
+ * 直下に置かれている（登録ボタン・スペーサ画像もその兄弟）。実在するクラス/属性で狙う。
+ * 旧構造(.lessonMemoArea)も念のため残す。 */
+html.cit-top .lessonMemoArea,
+html.cit-top input.dispJugyoMemo,
+html.cit-top .lessonMain input.dispJugyoMemo ~ img,
+html.cit-top .lessonMain input.dispJugyoMemo ~ button,
+html.cit-top button[title*="授業メモ"] {
   position: absolute !important;
   left: -99999px !important;
   top: 0 !important;
