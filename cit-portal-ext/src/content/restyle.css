@@ -1,5 +1,5 @@
 /*
- * CIT Portal Restyle - 見た目改変の本体
+ * GENERIC PORTAL - 見た目改変の本体
  *
  * すべてのルールは html.cit-restyle 配下に限定する。
  * → 設定OFFのときは html から cit-restyle クラスが外れ、素の見た目に戻る。
@@ -649,4 +649,60 @@ a.cit-relogin-btn {
 }
 .cit-relogin-btn:hover {
   background: #0d3f85 !important;
+}
+
+/* ===== 成績ページ：年度学期の切り替えバー（grades.js が生成） =====
+ * 拡張が作る自前UIなので .cit-restyle スコープ外（常に適用）。 */
+.cit-grade-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0 12px;
+  padding: 8px 12px;
+  background: #fff;
+  border: 1px solid #e1e6ea;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+.cit-grade-btn {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #1558b0;
+  border: 1px solid #1558b0;
+  border-radius: 6px;
+  padding: 5px 14px;
+  cursor: pointer;
+}
+.cit-grade-btn:hover:not(:disabled) {
+  background: #0d3f85;
+  border-color: #0d3f85;
+}
+.cit-grade-btn:disabled {
+  background: #cbd2d9;
+  border-color: #cbd2d9;
+  cursor: default;
+}
+.cit-grade-select {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2933;
+  background: #fff;
+  border: 1px solid #c3cad3;
+  border-radius: 6px;
+  padding: 5px 10px;
+  min-width: 11em;
+  cursor: pointer;
+}
+
+/* 非選択の年度学期は画面外へ（display:none にすると「編集中」誤判定の恐れがあるため、
+ * 授業メモ欄と同じく要素は残したまま視覚的にだけ隠す） */
+.cit-grade-hidden {
+  position: absolute !important;
+  left: -99999px !important;
+  top: 0 !important;
+  width: 1000px !important;
 }

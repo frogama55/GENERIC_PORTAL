@@ -1,4 +1,4 @@
-# CIT Portal Restyle (personal)
+# GENERIC PORTAL
 
 千葉工大ポータル（`portal.chibatech.ac.jp/uprx/`）の**見た目だけ**を自分用に改善する、個人用の Chrome 拡張機能です。
 
@@ -7,7 +7,7 @@
 - 公開しません（Chromeウェブストアには出しません）
 - 認証画面（`sso.chibatech.ac.jp`）には一切触れません
 
-現在は **フェーズ1（見た目の改変のみ・通信なし）** の実装です。
+実装済みの機能一覧は [FEATURES.md](FEATURES.md)、導入手順は [INSTALL.md](INSTALL.md) を参照してください。
 
 ## できること
 

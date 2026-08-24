@@ -20,7 +20,7 @@
   ],
   "action": {
     "default_popup": "src/panel/settings.html",
-    "default_title": "CIT Portal Restyle"
+    "default_title": "GENERIC PORTAL"
   },
   "permissions": ["storage"],
   "host_permissions": ["https://portal.chibatech.ac.jp/uprx/*"]

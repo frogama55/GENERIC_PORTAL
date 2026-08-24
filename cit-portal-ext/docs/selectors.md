@@ -216,7 +216,20 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
   ajax 完了（`#funcForm:nendoSort .ui-button` から `ui-state-disabled` が外れる）を最大約5秒ポーリング
   → `#funcForm:search` をクリック。設定キー `gradesYearTerm`（既定true）。
 - 昇順/降順 = `#funcForm:nendoSort`（まとめて表示のときは disabled）。PDF出力 = `#funcForm:create`。
-- Stage B（年度学期ごとのページ切り替え：プルダウン＋前後ボタン）は結果表コンテナのDOM待ち・未実装。
+- 年度学期表示の結果構造（調査結果）：
+  - 年度学期ごとに **ラッパ要素は無く**、`#funcForm` の**直下**に
+    `label#funcForm:j_idtNNN:{N}:gakki`（学期ラベル）→ `div#funcForm:j_idtNNN:{N}:sskList`（成績表）
+    が N=0,1,2… と並ぶフラット構造。成績表の列は `科目|単位数|評価|GPA対象|出席率|教員氏名`。
+  - **年度と学期は別要素**なので「2025年度 前期」という連続文字列は存在しない
+    （最初その前提で探して0件だった）。表示名はブロック先頭テキストから `20\d{2}` と
+    `前期|後期|通年` を拾って組み立てる。
+  - `j_idtNNN` は動的なので固定せず、`[id$=":sskList"]` から prefix を実物から取り出すこと。
+  - GPA推移表は別物：`#funcForm:Kmy001`（ui-accordion）内の `#funcForm:Kmy001:gpaList`。
+    こちらの `td.colNendoGakki` は「2025年度 前期」を1セルで持つので**成績表と間違えやすい**。
+- 実装（grades.js, Stage B）：`#funcForm` の各直下要素を id 中の N でグループ分けし、
+  プルダウン＋前後ボタン（`.cit-grade-pager`）で選択中の N 以外を隠す（既定は最新＝最後）。
+  隠し方は `display:none` ではなく `.cit-grade-hidden`（画面外送り）。display:none だと
+  変更チェック(collectData)の対象から外れ「編集中」誤判定が出るリスクがあるため（メモ欄と同じ理由）。
 
 ### 自動ログアウト画面（セッション切れ）
 

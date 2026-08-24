@@ -1,4 +1,4 @@
-# EPUSUTAIN PORTAL — 自分のPCへの導入手順
+# GENERIC PORTAL — 自分のPCへの導入手順
 
 CIT（千葉工大）ポータルを使いやすくする個人用 Chrome 拡張機能です。
 Chrome ウェブストアには出していないので、**「デベロッパーモードで読み込む」**方法で入れます。
@@ -33,13 +33,13 @@ cit-portal-ext/
 1. Chrome のアドレスバーに `chrome://extensions` と入力して開く
 2. 右上の **「デベロッパー モード」** を **ON**
 3. 左上の **「パッケージ化されていない拡張機能を読み込む」** をクリック
-4. 手順1で置いた **`cit-portal-ext` フォルダ**（＝ `manifest.json` がある階層）を選択
-5. 一覧に **「EPUSUTAIN PORTAL」** が表示されれば読み込み完了
+4.  **`cit-portal-ext` フォルダ**（ `manifest.json` がある階層）を選択
+5. 一覧に **「GENERIC PORTAL」** が表示されれば読み込み完了
 
 ## 3. アイコンを固定（任意・おすすめ）
 
 - ツールバーの **パズルピース（拡張機能）アイコン** をクリック
-- 「EPUSUTAIN PORTAL」の **ピン留めアイコン** を押すと、ツールバーに常駐します
+- 「GENERIC PORTAL」の **ピン留めアイコン** を押すと、ツールバーに常駐します
 - このアイコンをクリックすると **設定ポップアップ**（各機能の ON/OFF）が開きます
 
 ## 4. 動作確認
@@ -66,7 +66,7 @@ cit-portal-ext/
 ファイルを編集したら、変更を反映するには：
 
 1. `chrome://extensions` を開く
-2. 「EPUSUTAIN PORTAL」のカードにある **リロード（↻）** ボタンを押す
+2. 「GENERIC PORTAL」のカードにある **リロード（↻）** ボタンを押す
 3. 開いているポータルのタブを **再読み込み**
 
 ## 名前・説明文を変えたいとき
@@ -75,7 +75,7 @@ cit-portal-ext/
 
 ## アンインストール
 
-`chrome://extensions` の「EPUSUTAIN PORTAL」で **「削除」**。設定データも一緒に消えます。
+`chrome://extensions` の「GENERIC PORTAL」で **「削除」**。設定データも一緒に消えます。
 
 ---
 

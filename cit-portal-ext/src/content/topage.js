@@ -1,4 +1,4 @@
-// CIT Portal Restyle - トップページ刷新（topage.js）
+// GENERIC PORTAL - トップページ刷新（topage.js）
 //
 // 頻繁に使う項目のアイコンバー（クイックランチャー）を設置する。まず Stage 1。
 //
