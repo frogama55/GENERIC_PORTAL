@@ -12,7 +12,8 @@
         "src/content/navfix.js",
         "src/content/attachment.js",
         "src/content/session.js",
-        "src/content/topage.js"
+        "src/content/topage.js",
+        "src/content/grades.js"
       ],
       "run_at": "document_start"
     }

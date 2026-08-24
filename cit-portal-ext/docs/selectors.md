@@ -202,6 +202,22 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
     16進エスケープになり文字化けする。`\A ` で改行として終端する）。
   - `.taniSu` と `.sign` を非表示（教科名・教員・講義室・シラバスのみ残す）。セルは白背景＋罫線。
 
+### 成績ページ `up/km/kmg006/Kmg00601.xhtml`（成績照会）
+
+- URLは他ページと共通の `Bsa00101.xhtml` になるため、**中身で判定**する
+  （`#funcForm:initPtn:1` と `label[for="funcForm:initPtn:1"]` のテキスト「年度学期表示」）。
+- 表示パターン = PrimeFaces ラジオ `#funcForm:initPtn`
+  （`:0`=まとめて表示（既定・checked） / `:1`=年度学期表示）。実体 input は
+  `.ui-helper-hidden-accessible` 内に隠れており、見た目は `.ui-radiobutton-box`。
+  onchange の ajax `u:` は `nendoSort / searchItemRowR / searchItemRow2 / searchItemRow3 / comments`
+  のみで **結果表は再描画されない** → 反映には「表示」ボタン `#funcForm:search`
+  （`PrimeFaces.ab({s:"funcForm:search",u:"funcForm"})`）を押す必要がある。
+- 実装（grades.js, Stage A）：読み込み時に1回だけ「年度学期表示」ラジオを代理クリック →
+  ajax 完了（`#funcForm:nendoSort .ui-button` から `ui-state-disabled` が外れる）を最大約5秒ポーリング
+  → `#funcForm:search` をクリック。設定キー `gradesYearTerm`（既定true）。
+- 昇順/降順 = `#funcForm:nendoSort`（まとめて表示のときは disabled）。PDF出力 = `#funcForm:create`。
+- Stage B（年度学期ごとのページ切り替え：プルダウン＋前後ボタン）は結果表コンテナのDOM待ち・未実装。
+
 ### 自動ログアウト画面（セッション切れ）
 
 - 一定時間無操作で自動ログアウトされると、URLは `.../pk/pky001/Pky00102.xhtml`（＝通常のトップと
