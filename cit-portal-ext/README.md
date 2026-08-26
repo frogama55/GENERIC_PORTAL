@@ -1,6 +1,6 @@
 # GENERIC PORTAL
 
-千葉工大ポータル（`portal.chibatech.ac.jp/uprx/`）の**見た目だけ**を自分用に改善する、個人用の Chrome 拡張機能です。
+千葉工大ポータル（`portal.chibatech.ac.jp/uprx/`）の**見た目だけ**を自分用に改善する、Chrome 拡張機能です。
 
 - データの外部送信は一切しません（[docs/privacy.md](docs/privacy.md) 参照）
 - ポータルへの書き込みはしません（読み取り専用）
