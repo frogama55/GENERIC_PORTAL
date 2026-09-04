@@ -1,5 +1,5 @@
 /*
- * GENERIC PORTAL - 見た目改変の本体
+ * NexPortal - 見た目改変の本体
  *
  * すべてのルールは html.cit-restyle 配下に限定する。
  * → 設定OFFのときは html から cit-restyle クラスが外れ、素の見た目に戻る。

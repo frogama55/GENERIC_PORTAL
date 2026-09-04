@@ -1,4 +1,4 @@
-// GENERIC PORTAL - content script
+// NexPortal - content script
 //
 // 役割：<html> にクラスを付け外しするだけ。実際の見た目は restyle.css が担当する。
 // ネットワーク送信は一切しない。chrome.storage.local から設定を読むのみ。

@@ -1,11 +1,11 @@
-# GENERIC PORTAL — できること（実装機能一覧）
+# NexPortal — できること（実装機能一覧）
 
-CIT（千葉工大）ポータル（`portal.chibatech.ac.jp/uprx/*`）を自分用に使いやすくする Chrome 拡張。
+特定の大学ポータル（1サイトのみ対象）の見た目・表示動作を見やすく整える非公式の Chrome 拡張。
 **外部送信なし・認証情報を読まない・読み取り専用・ローカル動作**（設計は
-[docs/privacy.md](docs/privacy.md) / [docs/security.md](docs/security.md)）。
+[PRIVACY_POLICY.md](PRIVACY_POLICY.md) / [docs/security.md](docs/security.md)）。
 各機能はツールバーの設定ポップアップで ON/OFF できます。
 
-導入手順は [INSTALL.md](INSTALL.md)、要素の詳細は [docs/selectors.md](docs/selectors.md) を参照。
+導入手順は [INSTALL.md](INSTALL.md) を参照。
 
 ---
 
@@ -93,6 +93,7 @@ CIT（千葉工大）ポータル（`portal.chibatech.ac.jp/uprx/*`）を自分�
 
 ## 対象・制約
 
-- 動作対象は `portal.chibatech.ac.jp/uprx/*` のみ。他サイトには一切影響しない
+- 動作対象は特定の大学ポータル1サイトのみ。他サイトには一切影響しない
 - 権限は `storage`（設定保存）のみ。外部ドメインへの通信権限は持たない
 - データの外部送信なし／認証情報の読み取り・保存なし／サーバーへの書き込みなし（読み取り専用）
+- 対象ポータルの運営元とは無関係の非公式・個人開発物

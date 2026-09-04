@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "GENERIC PORTAL",
+  "name": "NexPortal",
   "version": "0.1.0",
-  "description": "個人用拡張機能。個人情報保護のため、外部送信なし、読み取り専用であり、ローカルで動くようにしてあります。",
+  "description": "大学ポータル（対象は特定の1サイトのみ）の見た目・表示動作を見やすく整える非公式の個人開発拡張機能。外部送信なし・読み取り専用・ローカル動作。",
   "content_scripts": [
     {
       "matches": ["https://portal.chibatech.ac.jp/uprx/*"],
@@ -21,7 +21,7 @@
   ],
   "action": {
     "default_popup": "src/panel/settings.html",
-    "default_title": "GENERIC PORTAL"
+    "default_title": "NexPortal"
   },
   "permissions": ["storage"],
   "host_permissions": ["https://portal.chibatech.ac.jp/uprx/*"]

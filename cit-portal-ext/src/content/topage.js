@@ -1,4 +1,4 @@
-// GENERIC PORTAL - トップページ刷新（topage.js）
+// NexPortal - トップページ刷新（topage.js）
 //
 // 頻繁に使う項目のアイコンバー（クイックランチャー）を設置する。まず Stage 1。
 //

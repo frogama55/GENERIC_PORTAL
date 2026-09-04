@@ -1,4 +1,4 @@
-// GENERIC PORTAL - 添付ファイルのブラウザ内プレビュー（attachment viewer）
+// NexPortal - 添付ファイルのブラウザ内プレビュー（attachment viewer）
 //
 // 目的：掲示の添付PDFを、いちいちダウンロード/削除せずブラウザ内で閲覧できるようにする。
 //
