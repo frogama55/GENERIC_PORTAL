@@ -27,6 +27,17 @@ h2 {
   line-height: 1.5;
 }
 
+.disclaimer {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #7a4a00;
+  background: #fff6e5;
+  border: 1px solid #f0d99a;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin: 0 0 14px;
+}
+
 section {
   margin-bottom: 14px;
   padding-bottom: 10px;
