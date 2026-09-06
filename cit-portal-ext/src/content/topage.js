@@ -11,13 +11,15 @@
 //   バーが消えたりする．そこで MutationObserver で監視し，消えていれば作り直す．
 //
 // 設定キー（chrome.storage.local）:
+//   enabled : boolean  拡張全体の ON/OFF（他の設定と AND で効く）
 //   topPage : boolean  トップページ刷新の ON/OFF（デフォルト true）
 
 "use strict";
 
 (() => {
-  const DEFAULTS = { topPage: true };
-  let enabled = false;
+  const DEFAULTS = { enabled: true, topPage: true };
+  let masterEnabled = false;
+  let featureEnabled = false;
 
   // 掲示を5件表示するため読み込み時に「もっと見る」を自動実行する．
   // （「編集中」誤判定の原因はメモ欄の display:none だったため，これは有効に戻す）
@@ -238,7 +240,7 @@
   }
 
   function tick() {
-    if (!enabled) return;
+    if (!masterEnabled || !featureEnabled) return;
     markTop();
     buildBar();
     if (document.documentElement.classList.contains("cit-top")) {
@@ -257,8 +259,9 @@
 
   chrome.storage.local.get(DEFAULTS, (s) => {
     if (chrome.runtime.lastError) return;
-    enabled = !!s.topPage;
-    if (!enabled) return;
+    masterEnabled = !!s.enabled;
+    featureEnabled = !!s.topPage;
+    if (!masterEnabled || !featureEnabled) return;
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {
@@ -266,11 +269,12 @@
     }
   });
 
-  // 設定変更に追従
+  // 設定変更に追従（全体スイッチ・個別スイッチの両方を見る）
   chrome.storage.onChanged.addListener((c, area) => {
-    if (area !== "local" || !c.topPage) return;
-    enabled = !!c.topPage.newValue;
-    if (enabled) {
+    if (area !== "local" || (!c.enabled && !c.topPage)) return;
+    if (c.enabled) masterEnabled = !!c.enabled.newValue;
+    if (c.topPage) featureEnabled = !!c.topPage.newValue;
+    if (masterEnabled && featureEnabled) {
       tick();
     } else {
       const b = document.getElementById("cit-quicklaunch");

@@ -15,21 +15,26 @@
 //   - 失敗時は通常のダウンロードにフォールバック（壊さない）．
 //
 // 設定キー（chrome.storage.local）:
+//   enabled      : boolean  拡張全体の ON/OFF（他の設定と AND で効く）
 //   attachInline : boolean  この機能の ON/OFF（デフォルト true）
 
 "use strict";
 
 (() => {
-  const DEFAULTS = { attachInline: true };
-  let enabled = DEFAULTS.attachInline;
+  const DEFAULTS = { enabled: true, attachInline: true };
+  let masterEnabled = true;
+  let featureEnabled = true;
   let bypass = false; // フォールバック時に横取りを1回だけ素通しするフラグ
 
   chrome.storage.local.get(DEFAULTS, (s) => {
     if (chrome.runtime.lastError) return;
-    enabled = s.attachInline;
+    masterEnabled = !!s.enabled;
+    featureEnabled = !!s.attachInline;
   });
   chrome.storage.onChanged.addListener((c, area) => {
-    if (area === "local" && c.attachInline) enabled = c.attachInline.newValue;
+    if (area !== "local") return;
+    if (c.enabled) masterEnabled = !!c.enabled.newValue;
+    if (c.attachInline) featureEnabled = !!c.attachInline.newValue;
   });
 
   // 添付一覧のダウンロード（フォームPOST）を横取りする
@@ -40,7 +45,7 @@
         bypass = false;
         return; // フォールバックの素通し
       }
-      if (!enabled) return;
+      if (!masterEnabled || !featureEnabled) return;
       const submitter = e.submitter;
       if (!submitter || !submitter.closest) return;
       // 添付一覧(.fileListArea)内のボタンによる送信だけを対象にする

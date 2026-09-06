@@ -18,12 +18,13 @@
 //     (collectData) の集計対象から外れて「編集中」誤判定が出るのを避けるため（メモ欄と同じ理由）．
 //
 // 設定キー（chrome.storage.local）:
+//   enabled        : boolean  拡張全体の ON/OFF（他の設定と AND で効く）
 //   gradesYearTerm : boolean  この機能の ON/OFF（デフォルト true）
 
 "use strict";
 
 (() => {
-  const DEFAULTS = { gradesYearTerm: true };
+  const DEFAULTS = { enabled: true, gradesYearTerm: true };
   const RADIO_YEAR_TERM = "funcForm:initPtn:1"; // 年度学期表示
   const SEARCH_BTN = "funcForm:search"; // 「表示」ボタン
   const PAGER_ID = "cit-grade-pager";
@@ -221,7 +222,7 @@
 
   chrome.storage.local.get(DEFAULTS, (s) => {
     if (chrome.runtime.lastError) return;
-    enabled = !!s.gradesYearTerm;
+    enabled = !!s.enabled && !!s.gradesYearTerm;
     if (!enabled) return;
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", start, { once: true });

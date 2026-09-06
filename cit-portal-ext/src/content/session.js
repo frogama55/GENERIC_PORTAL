@@ -15,6 +15,7 @@
 //   - メッセージが後から動的に描画される場合に備え，一定時間 DOM の変化を監視する．
 //
 // 設定キー（chrome.storage.local）:
+//   enabled       : boolean  拡張全体の ON/OFF（他の設定と AND で効く）
 //   reloginButton : boolean  この機能の ON/OFF（デフォルト true）
 
 "use strict";
@@ -22,7 +23,7 @@
 (() => {
   // ポータル入口．セッションが無いのでアクセスするとSSOログインへリダイレクトされる．
   const LOGIN_URL = "https://portal.chibatech.ac.jp/uprx/";
-  const DEFAULTS = { reloginButton: true };
+  const DEFAULTS = { enabled: true, reloginButton: true };
   const WATCH_MS = 15000; // 動的描画を待つ監視時間
 
   // 行き止まりの自動ログアウト画面か？（「この画面を閉じ」を必須にしてログイン画面と区別）
@@ -93,7 +94,7 @@
 
   chrome.storage.local.get(DEFAULTS, (s) => {
     if (chrome.runtime.lastError) return;
-    if (!s.reloginButton) return;
+    if (!s.enabled || !s.reloginButton) return;
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", start, { once: true });
     } else {

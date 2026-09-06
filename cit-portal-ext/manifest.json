@@ -9,7 +9,6 @@
       "css": ["src/content/restyle.css"],
       "js": [
         "src/content/restyle.js",
-        "src/content/navfix.js",
         "src/content/attachment.js",
         "src/content/session.js",
         "src/content/topage.js",

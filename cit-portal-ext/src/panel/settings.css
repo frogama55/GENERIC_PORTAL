@@ -1,6 +1,6 @@
 body {
   font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
-  width: 260px;
+  width: 300px;
   margin: 0;
   padding: 14px 16px;
   color: #1f2933;
@@ -12,26 +12,52 @@ h1 {
   margin: 0 0 6px;
 }
 
+h2 {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7b8794;
+  letter-spacing: 0.02em;
+  margin: 0 0 4px;
+}
+
 .note {
   font-size: 11px;
   color: #52606d;
-  margin: 0 0 12px;
+  margin: 0 0 14px;
   line-height: 1.5;
+}
+
+section {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e4e7eb;
+}
+
+section:last-of-type {
+  border-bottom: none;
+  margin-bottom: 6px;
+  padding-bottom: 0;
 }
 
 .row {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 0;
+  padding: 7px 0;
   font-size: 13px;
   cursor: pointer;
+}
+
+.row-indent {
+  margin-left: 24px;
+  padding-top: 2px;
 }
 
 .row input[type="checkbox"] {
   width: 16px;
   height: 16px;
   cursor: pointer;
+  flex: 0 0 auto;
 }
 
 .row small {
@@ -39,15 +65,28 @@ h1 {
   font-size: 11px;
 }
 
-.sep {
-  border: none;
-  border-top: 1px solid #e4e7eb;
-  margin: 6px 0;
-}
-
-.hint {
+footer {
   font-size: 11px;
   color: #7b8794;
-  margin: 10px 0 0;
-  line-height: 1.5;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-top: 4px;
+}
+
+footer a {
+  color: #1558b0;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+footer .dot {
+  color: #c3cad3;
+}
+
+footer .version {
+  margin-left: auto;
 }

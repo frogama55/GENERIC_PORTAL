@@ -8,7 +8,6 @@ const DEFAULTS = {
   gradesYearTerm: true,
   attachInline: true,
   reloginButton: true,
-  smartBack: false,
 };
 
 const enabledEl = document.getElementById("enabled");
@@ -17,7 +16,6 @@ const topPageEl = document.getElementById("topPage");
 const gradesYearTermEl = document.getElementById("gradesYearTerm");
 const attachInlineEl = document.getElementById("attachInline");
 const reloginButtonEl = document.getElementById("reloginButton");
-const smartBackEl = document.getElementById("smartBack");
 
 // 現在の設定を読み込んでチェックボックスに反映
 chrome.storage.local.get(DEFAULTS, (settings) => {
@@ -27,7 +25,6 @@ chrome.storage.local.get(DEFAULTS, (settings) => {
   gradesYearTermEl.checked = settings.gradesYearTerm;
   attachInlineEl.checked = settings.attachInline;
   reloginButtonEl.checked = settings.reloginButton;
-  smartBackEl.checked = settings.smartBack;
 });
 
 // 変更を保存（content script が storage.onChanged で拾って即反映する）
@@ -39,7 +36,6 @@ function save() {
     gradesYearTerm: gradesYearTermEl.checked,
     attachInline: attachInlineEl.checked,
     reloginButton: reloginButtonEl.checked,
-    smartBack: smartBackEl.checked,
   });
 }
 
@@ -49,4 +45,7 @@ topPageEl.addEventListener("change", save);
 gradesYearTermEl.addEventListener("change", save);
 attachInlineEl.addEventListener("change", save);
 reloginButtonEl.addEventListener("change", save);
-smartBackEl.addEventListener("change", save);
+
+// フッターにバージョン番号を表示
+const versionEl = document.getElementById("version");
+if (versionEl) versionEl.textContent = "v" + chrome.runtime.getManifest().version;
