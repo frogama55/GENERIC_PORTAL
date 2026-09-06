@@ -1,18 +1,18 @@
 // NexPortal - 添付ファイルのブラウザ内プレビュー（attachment viewer）
 //
-// 目的：掲示の添付PDFを、いちいちダウンロード/削除せずブラウザ内で閲覧できるようにする。
+// 目的：掲示の添付PDFを，いちいちダウンロード/削除せずブラウザ内で閲覧できるようにする．
 //
 // 仕組み：
 //   添付一覧(.fileListArea)の「ダウンロード」ボタンはフォームを POST 送信してファイルを取得する
-//   （Content-Disposition: attachment で強制DL）。この submit を横取りし、同じ内容を
+//   （Content-Disposition: attachment で強制DL）．この submit を横取りし，同じ内容を
 //   same-origin の fetch で取得 → blob 化 → ページ内オーバーレイの iframe(＝Chrome内蔵PDF
-//   ビューア) で表示する。「新しいタブで開く」「保存」も添える。
+//   ビューア) で表示する．「新しいタブで開く」「保存」も添える．
 //
 // セキュリティ（docs/security.md 準拠）：
-//   - 通信先はポータル自身のみ(same-origin)。第三者へは一切送らない。
-//   - 認証情報は読まない（クッキーはブラウザが自動付与。HttpOnlyで中身も読めない）。
-//   - 取得データは表示のためだけの一時 blob。保存も外部送信もしない。
-//   - 失敗時は通常のダウンロードにフォールバック（壊さない）。
+//   - 通信先はポータル自身のみ(same-origin)．第三者へは一切送らない．
+//   - 認証情報は読まない（クッキーはブラウザが自動付与．HttpOnlyで中身も読めない）．
+//   - 取得データは表示のためだけの一時 blob．保存も外部送信もしない．
+//   - 失敗時は通常のダウンロードにフォールバック（壊さない）．
 //
 // 設定キー（chrome.storage.local）:
 //   attachInline : boolean  この機能の ON/OFF（デフォルト true）
@@ -70,7 +70,7 @@
     });
     if (!res.ok) throw new Error("http " + res.status);
     const ct = res.headers.get("Content-Type") || "";
-    // HTMLが返ってきた＝エラー/期限切れ等。プレビューせず通常DLへフォールバック。
+    // HTMLが返ってきた＝エラー/期限切れ等．プレビューせず通常DLへフォールバック．
     if (/text\/html/i.test(ct)) throw new Error("not a file");
     const filename =
       parseFilename(res.headers.get("Content-Disposition") || "") || "attachment";
@@ -110,7 +110,7 @@
     const url = URL.createObjectURL(blob);
     const overlay = document.createElement("div");
     overlay.className = "cit-pdf-overlay";
-    // 静的テンプレート。可変値(filename/url)は後で textContent/プロパティ経由で入れる（インジェクション防止）
+    // 静的テンプレート．可変値(filename/url)は後で textContent/プロパティ経由で入れる（インジェクション防止）
     overlay.innerHTML =
       '<div class="cit-pdf-bar">' +
       '<span class="cit-pdf-name"></span>' +

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "NexPortal",
   "version": "0.1.0",
-  "description": "大学ポータル（対象は特定の1サイトのみ）の見た目・表示動作を見やすく整える非公式の個人開発拡張機能。外部送信なし・読み取り専用・ローカル動作。",
+  "description": "大学ポータル（対象は特定の1サイトのみ）の見た目・表示動作を見やすく整える非公式の個人開発拡張機能．外部送信なし・読み取り専用・ローカル動作．",
   "content_scripts": [
     {
       "matches": ["https://portal.chibatech.ac.jp/uprx/*"],

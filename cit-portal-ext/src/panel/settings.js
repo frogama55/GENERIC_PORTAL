@@ -1,4 +1,4 @@
-// 設定画面のロジック。chrome.storage.local に読み書きするだけ。外部送信なし。
+// 設定画面のロジック．chrome.storage.local に読み書きするだけ．外部送信なし．
 "use strict";
 
 const DEFAULTS = {

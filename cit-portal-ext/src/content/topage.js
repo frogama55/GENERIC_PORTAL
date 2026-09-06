@@ -1,14 +1,14 @@
 // NexPortal - トップページ刷新（topage.js）
 //
-// 頻繁に使う項目のアイコンバー（クイックランチャー）を設置する。まず Stage 1。
+// 頻繁に使う項目のアイコンバー（クイックランチャー）を設置する．まず Stage 1．
 //
-// クイックボタンは、元メニュー(#menuForm:mainMenu)の該当項目 <a> を「項目テキスト」で探して
-// 同期的に .click() する（＝サイト本来のナビゲーションをそのまま使う）。POST遷移でも
-// ポップアップでも確実に動く。URLを自作せず、ネットワークを新たに叩かない。
+// クイックボタンは，元メニュー(#menuForm:mainMenu)の該当項目 <a> を「項目テキスト」で探して
+// 同期的に .click() する（＝サイト本来のナビゲーションをそのまま使う）．POST遷移でも
+// ポップアップでも確実に動く．URLを自作せず，ネットワークを新たに叩かない．
 //
-// 表示条件：グローバルメニュー(#menuForm:mainMenu)があるページ（＝ログイン済み）。
-//   ポータルはページ内をAJAX/POSTで再描画するため、content script が再実行されなかったり
-//   バーが消えたりする。そこで MutationObserver で監視し、消えていれば作り直す。
+// 表示条件：グローバルメニュー(#menuForm:mainMenu)があるページ（＝ログイン済み）．
+//   ポータルはページ内をAJAX/POSTで再描画するため，content script が再実行されなかったり
+//   バーが消えたりする．そこで MutationObserver で監視し，消えていれば作り直す．
 //
 // 設定キー（chrome.storage.local）:
 //   topPage : boolean  トップページ刷新の ON/OFF（デフォルト true）
@@ -19,8 +19,8 @@
   const DEFAULTS = { topPage: true };
   let enabled = false;
 
-  // 掲示を5件表示するため読み込み時に「もっと見る」を自動実行する。
-  // （「編集中」誤判定の原因はメモ欄の display:none だったため、これは有効に戻す）
+  // 掲示を5件表示するため読み込み時に「もっと見る」を自動実行する．
+  // （「編集中」誤判定の原因はメモ欄の display:none だったため，これは有効に戻す）
   const AUTO_EXPAND_KEIJI = true;
 
   const ITEMS = [
@@ -81,8 +81,8 @@
   }
 
   function markTop() {
-    // トップページ判定は中身ベース（#mainWrapBottomPortal はトップ固有）。
-    // URLは Pky00102 / Bsa00101 と揺れるため使わない。
+    // トップページ判定は中身ベース（#mainWrapBottomPortal はトップ固有）．
+    // URLは Pky00102 / Bsa00101 と揺れるため使わない．
     const isTop = !!document.getElementById("mainWrapBottomPortal");
     document.documentElement.classList.toggle("cit-top", isTop);
   }
@@ -95,7 +95,7 @@
     return panel ? panel.querySelector("ul.ui-datalist-data") : null;
   }
 
-  // 元の「もっと見る」リンク（a.ui-commandlink でテキストが「もっと見る」。自作リンクは除外される）
+  // 元の「もっと見る」リンク（a.ui-commandlink でテキストが「もっと見る」．自作リンクは除外される）
   function findNativeMore(support) {
     for (const a of support.querySelectorAll("a.ui-commandlink")) {
       if (a.textContent.trim() === "もっと見る") return a;
@@ -113,7 +113,7 @@
     a.textContent = "もっと見る（重要の掲示一覧へ）";
     a.addEventListener("click", (e) => {
       e.preventDefault();
-      // 掲示一覧ページへ遷移し、遷移先で「重要」タブを開くためのフラグを置く
+      // 掲示一覧ページへ遷移し，遷移先で「重要」タブを開くためのフラグを置く
       try {
         sessionStorage.setItem("citKeijiTab", "重要");
       } catch (_) {}
@@ -139,7 +139,7 @@
       return; // AJAX後に tick が再実行される
     }
 
-    // 2) 元「もっと見る」を隠し、自前の「重要一覧へ」リンクを設置
+    // 2) 元「もっと見る」を隠し，自前の「重要一覧へ」リンクを設置
     if (nativeMore) nativeMore.style.display = "none";
     ensureMyMoreLink(support);
   }
@@ -167,7 +167,7 @@
   }
 
   // ---- その日のスケジュール：同じ授業が連続するコマを1つにまとめる ----
-  // 例）09:00-10:00 と 10:00-11:00 が同じ授業なら、先頭を「09:00 - 11:00」にして後続を隠す。
+  // 例）09:00-10:00 と 10:00-11:00 が同じ授業なら，先頭を「09:00 - 11:00」にして後続を隠す．
 
   const TIME_RE = /(\d{1,2}:\d{2})(\s*[-–—~〜]\s*)(\d{1,2}:\d{2})/;
 
@@ -183,8 +183,8 @@
     return m ? { start: m[1], end: m[3] } : null;
   }
 
-  // .lessonHead 内の「HH:MM - HH:MM」の終了時刻だけ書き換える。
-  // 開始と終了が別要素に分かれている場合（1つのテキストノードに揃っていない場合）にも対応する。
+  // .lessonHead 内の「HH:MM - HH:MM」の終了時刻だけ書き換える．
+  // 開始と終了が別要素に分かれている場合（1つのテキストノードに揃っていない場合）にも対応する．
   function setLessonEnd(li, end) {
     const head = li.querySelector(".lessonHead");
     if (!head) return;
@@ -199,7 +199,7 @@
       }
       if (/\d{1,2}:\d{2}/.test(n.nodeValue)) timeNodes.push(n);
     }
-    // 分かれている場合は、最後に出てくる時刻＝終了時刻とみなして置き換える
+    // 分かれている場合は，最後に出てくる時刻＝終了時刻とみなして置き換える
     const lastNode = timeNodes[timeNodes.length - 1];
     if (lastNode) {
       lastNode.nodeValue = lastNode.nodeValue.replace(
@@ -250,7 +250,7 @@
 
   function start() {
     tick();
-    // AJAX/POSTでの部分再描画に備え、消えたら作り直す
+    // AJAX/POSTでの部分再描画に備え，消えたら作り直す
     const obs = new MutationObserver(() => tick());
     obs.observe(document.documentElement, { childList: true, subtree: true });
   }

@@ -1,10 +1,10 @@
 // NexPortal - 出欠状況確認ページ（Atb005）の改善
 //
-// 出欠セルの中身（マーク・日付）を div.cit-att-cell で包み、「日付 → マーク」の順に並べ替える。
-// ※ td 自体を flex にすると「表のセル」でなくなって行が崩れるため、ラッパを挟む必要がある。
+// 出欠セルの中身（マーク・日付）を div.cit-att-cell で包み，「日付 → マーク」の順に並べ替える．
+// ※ td 自体を flex にすると「表のセル」でなくなって行が崩れるため，ラッパを挟む必要がある．
 //
-// 見た目（複製テーブルの非表示・内部スクロール解除・sticky固定・セルの整形）は restyle.css 側。
-// 通信は一切しない。改変OFF時（html に cit-restyle が無い）は何もしない。
+// 見た目（複製テーブルの非表示・内部スクロール解除・sticky固定・セルの整形）は restyle.css 側．
+// 通信は一切しない．改変OFF時（html に cit-restyle が無い）は何もしない．
 
 "use strict";
 
@@ -40,7 +40,7 @@
 
   function start() {
     tick();
-    // ajax で表が描き直されるため、変化を見て包み直す
+    // ajax で表が描き直されるため，変化を見て包み直す
     const obs = new MutationObserver(() => tick());
     obs.observe(document.documentElement, { childList: true, subtree: true });
   }
