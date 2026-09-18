@@ -47,12 +47,23 @@ html.cit-restyle li {
   line-height: 1.7 !important;
 }
 
-/* ===== テーブルの可読性（縞・境界・ヘッダ固定色） ===== */
+/* ===== テーブルの可読性（縞・境界・ヘッダ固定色） =====
+ * 「項目名(th) / 値(td)」形式の情報照会系テーブル（学籍情報照会など）で，
+ * th の背景が行ごとに濃紺／薄灰で交互になり縞が読みづらい問題への対応．
+ * 原因：サイト既定の th に background-color だけでなく背景「画像」（グラデーション等）
+ * が設定されており，background-color の上書きだけでは画像が上に残って消えない
+ * （.btnSearch の検索ボタンで過去に踏んだのと同じ落とし穴）．
+ * → background-image を明示的に none にして単色へ統一し，行の境界線も足して
+ *   縞に頼らなくても見分けられるようにする． */
 html.cit-restyle table {
   border-collapse: collapse !important;
 }
+html.cit-restyle table tr {
+  border-bottom: 1px solid #e7eaee;
+}
 html.cit-restyle table tr:nth-child(even) > td {
   background-color: #f6f8fa !important;
+  background-image: none !important;
 }
 html.cit-restyle table td,
 html.cit-restyle table th {
@@ -60,7 +71,29 @@ html.cit-restyle table th {
 }
 html.cit-restyle th {
   background-color: #eef2f6 !important;
+  background-image: none !important;
   color: #1f2933 !important;
+}
+html.cit-restyle table tr:nth-child(even) > th {
+  background-color: #eef2f6 !important;
+  background-image: none !important;
+}
+
+/* 項目名セル（実機確認：<th> ではなく，サイトCSSで「濃い背景＋白文字」にした <td>）．
+ * 上の縞ルールで偶数行の背景だけ薄くなり「薄灰に白文字」で読めなくなっていた．
+ * 白文字のセル＝項目名セルと見なして restyle.js が .cit-label-cell を付けるので，
+ * 背景・文字色をまとめて単色に統一する（奇数/偶数の縞より優先されるよう詳細度を上げる）． */
+/* 実機で確認できた固定セレクタ（学籍情報照会：table.ui-panelgrid > tr.ui-widget-content >
+ * td.ui-panelgrid-cell.ui-widget-header.rowHeader > label.ui-outputlabel）も併記する． */
+html.cit-restyle table tr > td.cit-label-cell,
+html.cit-restyle table tr:nth-child(even) > td.cit-label-cell,
+html.cit-restyle table tr > td.ui-panelgrid-cell.ui-widget-header,
+html.cit-restyle table tr:nth-child(even) > td.ui-panelgrid-cell.ui-widget-header {
+  background-color: #e6ebf1 !important;
+  background-image: none !important;
+  color: #1f2933 !important;
+  font-weight: 600 !important;
+  border-right: 1px solid #d5dce3 !important;
 }
 
 /* ===== フォーム部品の当たり判定・見た目 ===== */
@@ -414,6 +447,11 @@ html.cit-restyle table.classTable .jugyo-info .noTextIconLine button {
   line-height: 16px !important;
 }
 
+/* ===== ダイアログ本文のスクロールが端に達しても後ろのページへ連鎖させない ===== */
+html.cit-restyle .ui-dialog-content {
+  overscroll-behavior: contain;
+}
+
 /* ===== スクロールバーを細く控えめに ===== */
 html.cit-restyle ::-webkit-scrollbar {
   width: 10px;
@@ -478,6 +516,142 @@ html.cit-restyle ::-webkit-scrollbar-thumb {
   border: none;
   background: #fff;
   border-radius: 0 0 8px 8px;
+}
+
+/* プレビュー取得中のスピナー（fetch中，iframe読み込み前に表示） */
+.cit-pdf-loading {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+  color: #52606d;
+  font-size: 13px;
+}
+.cit-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #dfe3e8;
+  border-top-color: #1558b0;
+  border-radius: 50%;
+  animation: cit-spin 0.8s linear infinite;
+}
+@keyframes cit-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ===== 添付ファイルのクイック一覧（掲示ダイアログ下部・attachment.js が生成） =====
+ * 「添付資料を確認」を経由せず，ファイル名クリックだけでプレビューへ直接遷移させるための一覧． */
+.cit-attach-quicklist {
+  margin: 10px 2px 4px;
+  padding: 10px 12px;
+  background: #f6f8fa;
+  border: 1px solid #e1e6ea;
+  border-radius: 8px;
+}
+.cit-attach-quicklist-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #52606d;
+  margin: 0 0 6px;
+}
+.cit-attach-quicklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  font: inherit;
+  font-size: 13px;
+  color: #1558b0;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  text-align: left;
+}
+.cit-attach-quicklist-item:hover {
+  background: #eaf1fb;
+  text-decoration: underline;
+}
+.cit-attach-quicklist-item .fa {
+  flex: 0 0 auto;
+  color: #7b8794;
+}
+.cit-attach-quicklist-item span.cit-attach-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 「添付資料を確認」を自動展開すると添付一覧が別ダイアログで前面に出てくるので，
+ * そのダイアログ（＋モーダルの遮蔽 <id>_modal）は開いたまま不可視にし，掲示ダイアログ下部の
+ * クイック一覧だけを見せる．閉じずに残すのは，ダウンロードボタンの代理クリック先を保つため．
+ * ※ visibility:hidden はサイトの `* { visibility: visible !important }` に負けるので opacity で隠す．
+ * 自動展開の直後〜検出まで（html.cit-attach-suppress）は，掲示ダイアログ(.cit-attach-host)以外の
+ * ダイアログを一時的に全部不可視にして一瞬のチラつきも抑える． */
+.cit-attach-filedlg,
+.cit-attach-filedlg-mask,
+html.cit-attach-suppress .ui-dialog:not(.cit-attach-host),
+html.cit-attach-suppress [id$="_modal"]:not(.cit-attach-host-mask) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* ===== ローディングUI（AJAX中の表示・loading.js が生成） =====
+ * ポータル本来の「画面中央のローディング表示」の代わりに出す，中央の小さなカード
+ * （スピナー＋「読み込み中…」）．loading-bridge.js 経由の AJAX 開始/終了に連動する．
+ * クリックを遮らない（pointer-events:none）．拡張が作る自前UIなので常時スタイルする． */
+.cit-loading-box {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(0.96);
+  z-index: 2147483001; /* .cit-pdf-overlay より前面 */
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid #e1e6ea;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.18);
+  font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1f2933;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.cit-loading-box.cit-loading-active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+.cit-loading-box .cit-spinner {
+  width: 22px;
+  height: 22px;
+  border-width: 3px;
+}
+
+/* ポータル本来のローディング表示（PrimeFaces BlockUI）を隠す．実機：
+ *   div#wrap > div#j_idt40.ui-blockui-content（「loading...」＋バーの gif：img#j_idt42）
+ *   遮蔽レイヤ = div.ui-blockui.ui-widget-overlay（AJAX中のクリック防止）
+ * 中身（gif）は消し，遮蔽は「見えないが操作は止める」ままにしてサイト本来の挙動を保つ．
+ * html.cit-loading-custom は loading.js が機能ON時だけ付ける（OFFなら元の表示に戻る）．
+ * ※ visibility は使えない（サイトに `* { visibility: visible !important }` がある）． */
+html.cit-loading-custom .ui-blockui-content {
+  display: none !important;
+}
+html.cit-loading-custom .ui-blockui.ui-widget-overlay {
+  opacity: 0 !important;
 }
 
 /* ===== トップページのクイックランチャー（topage.js が生成） =====
@@ -641,9 +815,10 @@ a.cit-relogin-btn {
   background: #0d3f85 !important;
 }
 
-/* ===== 成績ページ：年度学期の切り替えバー（grades.js が生成） =====
+/* ===== 年度学期の切り替えバー（grades.js / timetable.js が生成） =====
+ * 成績ページ・時間割ページ共通の「学期ごとに1つずつ表示」UI．
  * 拡張が作る自前UIなので .cit-restyle スコープ外（常に適用）． */
-.cit-grade-pager {
+.cit-term-pager {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -655,7 +830,7 @@ a.cit-relogin-btn {
   border-radius: 10px;
   box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
 }
-.cit-grade-btn {
+.cit-term-btn {
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -666,16 +841,16 @@ a.cit-relogin-btn {
   padding: 5px 14px;
   cursor: pointer;
 }
-.cit-grade-btn:hover:not(:disabled) {
+.cit-term-btn:hover:not(:disabled) {
   background: #0d3f85;
   border-color: #0d3f85;
 }
-.cit-grade-btn:disabled {
+.cit-term-btn:disabled {
   background: #cbd2d9;
   border-color: #cbd2d9;
   cursor: default;
 }
-.cit-grade-select {
+.cit-term-select {
   font: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -687,10 +862,18 @@ a.cit-relogin-btn {
   min-width: 11em;
   cursor: pointer;
 }
+.cit-term-current {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1558b0;
+  background: #eaf1fb;
+  border-radius: 999px;
+  padding: 2px 10px;
+}
 
-/* 非選択の年度学期は画面外へ（display:none にすると「編集中」誤判定の恐れがあるため，
+/* 非選択の学期は画面外へ（display:none にすると「編集中」誤判定の恐れがあるため，
  * 授業メモ欄と同じく要素は残したまま視覚的にだけ隠す） */
-.cit-grade-hidden {
+.cit-term-hidden {
   position: absolute !important;
   left: -99999px !important;
   top: 0 !important;

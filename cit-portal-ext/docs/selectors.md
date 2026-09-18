@@ -108,6 +108,19 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
   `deltaY`（deltaMode考慮）ぶんだけ自前で scrollTop 加算，preventDefault + stopImmediatePropagation で
   サイト側処理を止める．改変OFF時は素の挙動．
 
+### モーダル中のスクロールロック（restyle.js）
+
+- 掲示ダイアログのモーダル遮蔽（`.ui-widget-overlay.ui-dialog-mask`）やローディングの遮蔽
+  （`.ui-blockui.ui-widget-overlay`）は**クリックは止めるがホイールは止めない**．
+  カーソルがダイアログの外にあると後ろのページがスクロールしてしまう（依頼者報告）．
+- 対応：表示中の `.ui-widget-overlay` が1つでもあれば（attachment.js が不可視化した添付一覧の
+  遮蔽 `.cit-attach-filedlg-mask` は除く）または拡張のローディングカード表示中は，
+  開いているダイアログの本文（`.ui-dialog-content`）以外での `wheel` / `touchmove` と
+  スクロールキー（矢印・PageUp/Down・Home/End・Space．入力欄とダイアログ内は除く）を
+  `preventDefault` する．`body { overflow:hidden }` 方式はスクロールバー幅で横に跳ねるので不採用．
+- あわせて `.ui-dialog-content { overscroll-behavior: contain }` で，本文の端に達したときの
+  後ろへの連鎖スクロールも止める．
+
 ### 添付ファイルのダウンロード（PrimeFaces fileDownload）
 
 - 実装：`Bsd00701.xhtml` への **POST**．レスポンスは `Content-Type: application/pdf`＋
@@ -283,6 +296,136 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
 - 検知したら「ログインページへ」ボタン（`.cit-relogin-btn`，リンク先 `https://portal.chibatech.ac.jp/uprx/`）
   をメッセージ箱に追加．入口へ行くとセッションが無いのでSSOログインへ誘導される．
 - パスワード保持・自動再ログインはしない（指示書フェーズ3の安全な範囲）．
+
+### 情報照会系テーブル（学籍情報照会など「th=項目名／td=値」形式）
+
+- ユーザー報告（スクリーンショット）：項目名列（th）の背景が行ごとに濃紺／薄灰で交互になり，
+  縞模様が読みづらい．ページURL・class名は未調査（ログイン環境が無いため実機確認できていない）．
+- 原因の推測：`.btnSearch`（検索ボタン）で past に確認済みの通り，このポータルはPrimeFacesの
+  旧テーマ由来で `th` 等に **背景色だけでなく背景画像**（グラデーション等）が設定されていることが
+  ある．`background-color` だけを上書きしても画像が上に残って消えない．
+- 実機確認（2回目のスクリーンショット）：項目名セルは **`<th>` ではない**．`th` 用の上書きが効かず，
+  逆に `tr:nth-child(even) > td` の縞で偶数行の背景だけ薄くなり，サイトCSSの**白文字**が
+  そのまま残って「薄灰に白文字」で読めなくなった．つまり項目名は「濃い背景＋白文字」にした `<td>`．
+  クラス名は未取得（下記の調査依頼で確認する）．
+- 対応（restyle.js + restyle.css）：クラス名に依存せず，**計算スタイルの文字色が白系の `td`**
+  （＝サイトが見出し扱いにしているセル）に `.cit-label-cell` を付け，背景 `#e6ebf1`・文字色
+  濃色・太字に統一する．入れ子テーブルを持つセル・空セルは除外．値側の縞は控えめ（`#f6f8fa`）に戻し，
+  行の `border-bottom` で区切る．
+- 実機で確認できた構造（学籍情報照会，Elements パネル）：
+  ```
+  div.ui-accordion-content
+    table.dataStyle > tbody > tr > td.dataStyle
+      table.ui-panelgrid.ui-widget.singleTable.listMargin[role=grid]   … id は funcForm:snsGrpPanel:0:j_idtNNN
+        tr.ui-widget-content[role=row]
+          td.ui-panelgrid-cell.ui-widget-header.rowHeader   … 項目名（白文字はテーマの .ui-widget-header 由来）
+            label.ui-outputlabel.ui-widget                  … 「学生氏名」
+          td.ui-panelgrid-cell                              … 値
+  ```
+  → restyle.css に固定セレクタ `td.ui-panelgrid-cell.ui-widget-header` を併記した．
+  色判定（`.cit-label-cell`）は他ページの同種テーブル向けの保険として残す．
+
+### ローディングUI（loading.js, 画面上部プログレスバー）
+
+- PrimeFacesはAJAXの送信/完了/失敗時に `pfAjaxSend` / `pfAjaxComplete` / `pfAjaxError` を
+  発火するが，これは **jQuery の `$(document).trigger()`** によるもので，ネイティブのDOMイベント
+  ではない．content script（隔離された世界）の `addEventListener` では**受け取れない**
+  （初版はここで動かなかった）．ページの `jQuery` も隔離世界からは見えない．
+- 対応：`loading-bridge.js` を manifest の `"world": "MAIN"`（`run_at: document_idle`）で
+  ページ側の世界に置き，jQuery イベントを購読してネイティブ `CustomEvent`
+  （`cit-ajax-start` / `cit-ajax-end` / `cit-ajax-idle`）に変換して `document` へ流す．
+  古い PrimeFaces（`global: true`）向けに jQuery のグローバル `ajaxStart` / `ajaxStop` も購読
+  （`ajaxStop`＝全完了＝idle でカウントをリセット）．
+- `loading.js`（隔離世界）はそれを購読して**画面中央の小さなカード**（`.cit-loading-box`，
+  スピナー＋「読み込み中…」，クリックは遮らない）を表示．進行中カウントで管理し，0で隠す．
+  150ms より速い処理では出さない（チラつき防止）．メニュー遷移などのフルPOST中は
+  `beforeunload` でも出す．終了通知の取りこぼし対策に20秒で自動リセット．
+  ※ 初版は画面上部のプログレスバーだったが，依頼者の意図は「ポータル本来の画面中央の
+  ローディング表示を置き換えたい」だったため中央カードに変更．
+- 実機確認：`PrimeFaces.VERSION` は undefined（古い版），`jQuery.fn.jquery` は 'X.X.X'
+  （版数を伏せたビルド），jQuery は `bI` に難読化されているが `window.jQuery` で参照可．
+- ポータル本来の中央ローディング表示（実機確認）＝ PrimeFaces **BlockUI**：
+  ```
+  div#wrap
+    div#j_idt40.ui-blockui-content.ui-widget.ui-widget-content.ui-corner-all.ui-helper-hidden.ui-shadow
+      img#j_idt42        … 「loading...」＋動くバーの gif
+    div.ui-blockui.ui-widget-overlay   … 遮蔽レイヤ（AJAX中のクリック防止．id は <content id>_blocker）
+  ```
+  `j_idtNN` は動的なので class で狙う．対応（restyle.css）：`html.cit-loading-custom` 配下で
+  `.ui-blockui-content` を `display:none`，`.ui-blockui.ui-widget-overlay` を `opacity:0`
+  （遮蔽＝操作防止はサイト本来の挙動なので残し，見た目だけ消す）．`cit-loading-custom` は
+  loading.js が機能ON時だけ html に付ける．
+- 確認方法（DevTools の Console）：`PrimeFaces.VERSION` と `jQuery.fn.jquery` を見る．
+  `jQuery(document).on('pfAjaxSend', () => console.log('send'))` を実行してから何か操作し，
+  `send` が出れば pf イベントは生きている．
+- 添付プレビュー取得中（`attachment.js` の fetch 待ち）にもスピナー（`.cit-pdf-loading` +
+  `.cit-spinner`）を表示するようにした．
+
+### 添付ファイル導線短縮（掲示ダイアログ下部のクイック一覧）
+
+- 目的：「掲示ページ→添付資料を確認→ダウンロードボタン」の3手順を，「掲示ページ下部の
+  ファイル名をクリック」の1手順に短縮する．
+- 実装（attachment.js）：
+  1. `document` 全体を対象に，テキストが完全一致で「添付資料を確認」の要素（`a` / `button` /
+     `.ui-commandlink` / `.ui-button` / `role=button`）を探し，見つかったら1回だけ代理クリックして
+     `.fileListArea` を展開させる（トップページの「もっと見る」自動展開と同じ方針）．
+  2. `.fileListArea` が現れたら，各行（`.tableDownloadRow`）からファイル名
+     （`.downLoadCellFilNm`）と実際に押すべきボタン（`.fileListCell.alignRight` 内の
+     `button:not(.dispNone)`）を集め，`.cit-attach-quicklist`（ファイル名の一覧）を
+     **掲示ダイアログ本文（トリガの `closest(".ui-dialog-content")`）の末尾**＝掲示の一番下に置く．
+     クリックすると元のボタンを代理クリックするだけなので，既存のプレビュー横取りがそのまま効く．
+- 実機確認（依頼者報告）：「添付資料を確認」は**別ダイアログ**を前面に開く（初版は一覧を
+  その中に置いていたため，掲示を開くたびに一覧ダイアログが前面に出て不便だった）．
+- 対応：添付一覧ダイアログは**閉じずに不可視**にする（`.cit-attach-filedlg` と，モーダル遮蔽
+  `<ダイアログid>_modal` に `.cit-attach-filedlg-mask`．`opacity:0; pointer-events:none`）．
+  閉じない理由：ダイアログを閉じる操作に伴うサーバ側の状態変化（close リスナ）を避け，
+  代理クリック先のボタンを確実に残すため．自動展開の直後〜検出までは `html.cit-attach-suppress`
+  で掲示ダイアログ（`.cit-attach-host`）以外を不可視にし，一瞬のチラつきも抑える（保険3秒）．
+  利用者が本物の「添付資料を確認」を自分で押した場合（`isTrusted`）は隠しを解除して見せる．
+- 実機確認：掲示の一番下に一覧が出る動作は意図通り．ただし**同じ一覧が2つ並んだ**
+  （`.fileListArea` が2つ描画される，または入れ子で `querySelectorAll` に2回掛かる）．
+  → 一覧は設置先（掲示ダイアログ本文）ごとに1つだけにし，ファイル名の並び（署名）が同じなら
+  作らない．署名が変われば作り直す．
+- 実機確認（添付一覧ダイアログの構造）：
+  ```
+  div#pkx02201:dialog.ui-dialog.rx-dialog.rx-dialog-small.ui-draggable.ui-resizable   … ← .cit-attach-filedlg が付く
+    div.ui-dialog-content
+      div#pkx02201:dialogPanel.ui-outputpanel
+        form#pkx02201:ch
+          div#pkx02201:ch:hanteiArea.ui-outputpanel
+            div.fileListArea
+  ```
+  掲示詳細（`#bsd00702:dialog`）とは別のダイアログで，`.ui-dialog` の中にある（不可視化は効いている）．
+  ダウンロードのフォームは `form#pkx02201:ch`（プレビュー横取りの submit はこのフォーム）．
+- **要実機確認**：モーダル遮蔽の id が `pkx02201:dialog_modal` であること（違えば遮蔽が薄く残る）．
+
+### 時間割ページの学期優先表示（timetable.js）
+
+- 前提（既存調査）：`table.classTable` は `.rishuArea > .ofAuto` 内に前期・後期で各1つ，
+  同時にDOM上へ並んでいる（タブ切り替えではない）．
+- 実機確認（依頼者のスクリーンショット）：各学期は「**2026年度 後期**」のような凡例を持つ
+  **折りたたみ枠（fieldset，「−」トグル付き）**に入っている．初版は `.ofAuto` をブロックにし，
+  ラベルを「直前きょうだいのテキスト走査」で拾っていたため，後期の枠に「前期」のラベルが付く
+  （＝プルダウンは前期なのに表示は後期）というズレが出た．
+- 対応：ブロック＝ `table.closest(".ui-fieldset, fieldset")`（無ければ `.ofAuto`，無ければ
+  テーブル自身）．ラベルは枠内の `legend, .ui-fieldset-legend` のテキストから `20\d{2}` と
+  `前期|後期|通年`（前学期/後学期も正規化）を拾って「YYYY年度 前期」に組み立てる．
+  legend が無いときだけ直前きょうだい走査にフォールバック．
+- 既定表示（依頼者指定）：**4/1〜9/15＝前期，それ以外＝後期**．年度は4月始まり（1〜3月は前年度）．
+  「YYYY年度＋学期」が一致するブロック → 学期だけ一致 → 最後（最新想定），の順で選ぶ．
+- 実機確認済み（依頼者のスニペット出力）．構造：
+  ```
+  div#wrap > div#mainWrapBottom > div#funcContent > form#funcForm
+    div#funcForm:j_idt263.ui-outputpanel.rishuArea
+      div.ofAuto                                   … ※ 前期・後期の fieldset を両方含む1つの箱
+        fieldset#funcForm:j_idt264:0:j_idt266.ui-fieldset.ui-fieldset-toggleable.colGakki   … 前期
+          div.ui-fieldset-content > table.table.table-bordered.classTable
+        fieldset#funcForm:j_idt264:1:j_idt266.ui-fieldset.ui-fieldset-toggleable.colGakki   … 後期
+          div.ui-fieldset-content > table.table.table-bordered.classTable
+  ```
+  `.ofAuto` は1つで両学期を含むため，初版の「`.ofAuto`＝ブロック」では2ブロックに分かれず
+  誤動作していた．`fieldset.colGakki` をブロックにする（`closest(".colGakki, .ui-fieldset, fieldset")`）．
+  表の下の「■ エラー」はサイト側の凡例（色の説明）と思われる．
 
 ### 戻るボタン修正機能（廃止・削除済み）
 

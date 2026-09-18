@@ -14,7 +14,7 @@
 //   N=0,1,2… と並ぶ（ブロックを囲むラッパ要素は無いフラット構造）．
 //   そこで #funcForm の各直下要素を id 中の N でグループ分けし，選択中の N 以外を隠す．
 //   表示の出し分けだけなので追加の通信は発生しない．
-//   ※ 隠す方法は display:none ではなく画面外送り（.cit-grade-hidden）．サイトの変更チェック
+//   ※ 隠す方法は display:none ではなく画面外送り（.cit-term-hidden）．サイトの変更チェック
 //     (collectData) の集計対象から外れて「編集中」誤判定が出るのを避けるため（メモ欄と同じ理由）．
 //
 // 設定キー（chrome.storage.local）:
@@ -27,8 +27,8 @@
   const DEFAULTS = { enabled: true, gradesYearTerm: true };
   const RADIO_YEAR_TERM = "funcForm:initPtn:1"; // 年度学期表示
   const SEARCH_BTN = "funcForm:search"; // 「表示」ボタン
-  const PAGER_ID = "cit-grade-pager";
-  const HIDDEN = "cit-grade-hidden";
+  const PAGER_ID = "cit-term-pager";
+  const HIDDEN = "cit-term-hidden";
 
   let enabled = true;
   let switched = false; // Stage A をページ読み込みごとに1回だけ実行する
@@ -151,15 +151,15 @@
 
     const bar = document.createElement("div");
     bar.id = PAGER_ID;
-    bar.className = "cit-grade-pager";
+    bar.className = "cit-term-pager";
 
     const prev = document.createElement("button");
     prev.type = "button";
-    prev.className = "cit-grade-btn";
+    prev.className = "cit-term-btn";
     prev.textContent = "◀ 前";
 
     const select = document.createElement("select");
-    select.className = "cit-grade-select";
+    select.className = "cit-term-select";
     // 表示名を作る．年度が拾えず「前期」「前期」と重複する場合は連番で区別する
     const base = keys.map((k) => blockLabel(map.get(k), k));
     const labels = base.map((t, i) =>
@@ -174,7 +174,7 @@
 
     const next = document.createElement("button");
     next.type = "button";
-    next.className = "cit-grade-btn";
+    next.className = "cit-term-btn";
     next.textContent = "次 ▶";
 
     function sync() {

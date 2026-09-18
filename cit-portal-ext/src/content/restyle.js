@@ -42,6 +42,51 @@ chrome.storage.onChanged.addListener((changes, area) => {
   });
 });
 
+// ===== 項目名セルの検出（.cit-label-cell）=====
+// 学籍情報照会などの「項目名｜値」形式テーブルは，項目名が <th> ではなく，サイトCSSで
+// 「濃い背景＋白文字」にした <td> だった（実機確認）．クラス名はページごとに違う可能性が
+// あるので，計算スタイルの文字色が白系のセル＝項目名セルと見なしてクラスを付け，
+// restyle.css 側で単色に統一する．色を見るだけで，中身のテキストは読まない．
+const labelChecked = new WeakSet();
+
+function isLightColor(rgb) {
+  const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(rgb || "");
+  if (!m) return false;
+  const lum = 0.299 * Number(m[1]) + 0.587 * Number(m[2]) + 0.114 * Number(m[3]);
+  return lum > 200;
+}
+
+function markLabelCells() {
+  if (!ROOT.classList.contains(CLASS_ENABLED)) return;
+  // レイアウト用の入れ子テーブルを持つセルは除外（誤検出を減らす）
+  for (const td of document.querySelectorAll("table td:not(.cit-label-cell):not(:has(table))")) {
+    if (labelChecked.has(td)) continue;
+    labelChecked.add(td);
+    if (!(td.textContent || "").trim()) continue;
+    if (isLightColor(getComputedStyle(td).color)) td.classList.add("cit-label-cell");
+  }
+}
+
+function startLabelCellWatch() {
+  markLabelCells();
+  let scheduled = false;
+  const obs = new MutationObserver(() => {
+    if (scheduled) return;
+    scheduled = true;
+    requestAnimationFrame(() => {
+      scheduled = false;
+      markLabelCells();
+    });
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", startLabelCellWatch, { once: true });
+} else {
+  startLabelCellWatch();
+}
+
 // 掲示の検索：黄色い検索ボタンをCSSで隠すため，入力欄で Enter を押したら
 // 元の検索ボタン(#funcForm:search)のクリックを呼んで検索を実行する．
 // （サイト本来の検索を叩くだけ．外部送信はしない）
@@ -87,4 +132,64 @@ document.addEventListener(
     e.stopImmediatePropagation();
   },
   { capture: true, passive: false }
+);
+
+// ===== モーダル中は後ろのページを動かさない（スクロールロック）=====
+// 掲示ダイアログやローディング中の遮蔽（.ui-widget-overlay）はクリックは止めるがホイールは
+// 止めないため，カーソルがダイアログの外にあると後ろのページがスクロールしてしまう．
+// 遮蔽が表示されている間（または拡張のローディングカード表示中）は，開いているダイアログの
+// 本文（.ui-dialog-content）以外でのホイール／タッチ／スクロールキーを止める．
+// ※ body に overflow:hidden を当てる方式はスクロールバー分の幅が変わって画面が横に跳ねるので，
+//    イベントを止める方式にする（上のダイアログ内ホイール処理と同じ考え方）．
+const FILE_DLG_MASK = "cit-attach-filedlg-mask"; // attachment.js が不可視化した添付一覧の遮蔽は数えない
+const SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "]);
+
+function isShown(el) {
+  return !!el && getComputedStyle(el).display !== "none";
+}
+
+function modalActive() {
+  for (const o of document.querySelectorAll(".ui-widget-overlay")) {
+    if (o.classList.contains(FILE_DLG_MASK)) continue;
+    if (isShown(o)) return true;
+  }
+  return !!document.querySelector(".cit-loading-box.cit-loading-active");
+}
+
+// 開いているダイアログの本文の中か（そこでのスクロールは通す）
+function insideOpenDialog(target, contentOnly) {
+  if (!target || !target.closest) return false;
+  const dlg = target.closest(".ui-dialog");
+  if (!dlg || !isShown(dlg) || dlg.classList.contains("cit-attach-filedlg")) return false;
+  return contentOnly ? !!target.closest(".ui-dialog-content") : true;
+}
+
+function isEditable(target) {
+  return (
+    !!target &&
+    !!target.closest &&
+    !!target.closest("input, textarea, select, [contenteditable=''], [contenteditable='true']")
+  );
+}
+
+function blockScroll(e) {
+  if (!ROOT.classList.contains(CLASS_ENABLED)) return;
+  if (!modalActive()) return;
+  if (insideOpenDialog(e.target, true)) return;
+  e.preventDefault();
+}
+
+document.addEventListener("wheel", blockScroll, { capture: true, passive: false });
+document.addEventListener("touchmove", blockScroll, { capture: true, passive: false });
+document.addEventListener(
+  "keydown",
+  (e) => {
+    if (!SCROLL_KEYS.has(e.key)) return;
+    if (!ROOT.classList.contains(CLASS_ENABLED)) return;
+    if (!modalActive()) return;
+    // ダイアログ内のボタン操作（Space）や入力欄のキーは通す
+    if (insideOpenDialog(e.target, false) || isEditable(e.target)) return;
+    e.preventDefault();
+  },
+  true
 );

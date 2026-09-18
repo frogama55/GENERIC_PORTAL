@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "NexPortal",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "大学ポータル（対象は特定の1サイトのみ）の見た目・表示動作を見やすく整える非公式の個人開発拡張機能．外部送信なし・読み取り専用・ローカル動作．",
   "content_scripts": [
     {
@@ -9,18 +9,38 @@
       "css": ["src/content/restyle.css"],
       "js": [
         "src/content/restyle.js",
+        "src/content/loading.js",
         "src/content/attachment.js",
         "src/content/session.js",
         "src/content/topage.js",
         "src/content/grades.js",
+        "src/content/timetable.js",
         "src/content/attendance.js"
       ],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["https://portal.chibatech.ac.jp/uprx/*"],
+      "js": ["src/content/loading-bridge.js"],
+      "run_at": "document_idle",
+      "world": "MAIN"
     }
   ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_popup": "src/panel/settings.html",
-    "default_title": "NexPortal"
+    "default_title": "NexPortal",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
   },
   "permissions": ["storage"],
   "host_permissions": ["https://portal.chibatech.ac.jp/uprx/*"]
