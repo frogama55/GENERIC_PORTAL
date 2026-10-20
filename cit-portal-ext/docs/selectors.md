@@ -175,8 +175,9 @@ div.alignRight              … 掲示1件のラッパ（複数繰り返し）
   `.lessonMain`（`.lessonTitle` 授業名, `.lessonDetail` 教員/教室, `.lessonBtnArea` シラバス/クラスプロファイル,
   `.lessonKeijiArea` 授業評価回答通知）＋`.lessonMemoArea`（メモ・非表示）．
   - `.lessonBtnArea` 内：シラバス照会 = `button`（title「シラバス照会…」），クラスプロファイル =
-    `button.cpBtn`．→ `.cpBtn` を非表示，`button:not(.cpBtn) .ui-button-text` を font-size:0＋
-    `::after{content:"シラバス"}` で短縮．
+    `button.cpBtn`．→ `.lessonBtnArea` を flex 化して両ボタンを横並びに表示（以前は `.cpBtn` を
+    非表示にしていたが，シラバスボタンの横に復活させた）．シラバス側は
+    `button:not(.cpBtn) .ui-button-text` を font-size:0＋`::after{content:"シラバス"}` で短縮．
   - `.lessonDetail` = `<p>`（教員）＋`<div>`（教室）→ inline化＋`div::before{content:" ／ "}` で1行．
   - 同じ授業が1時間ごとに別コマとして並ぶため，`mergeLessons()`（topage.js）で
     「授業名＋教員/教室」が同じかつ**前コマの終了＝次コマの開始**で連続するものをまとめる．

@@ -751,12 +751,14 @@ html.cit-top button[title*="授業メモ"] {
   width: 300px !important;
 }
 
-/* クラスプロファイルボタン（.cpBtn）を非表示 */
-html.cit-top #portalSchedule2 .lessonBtnArea .cpBtn {
-  display: none !important;
+/* クラスプロファイルボタン（.cpBtn）を「シラバス」ボタンの横に並べて表示 */
+html.cit-top #portalSchedule2 .lessonBtnArea {
+  display: flex !important;
+  align-items: center;
+  gap: 4px;
 }
 
-/* 残った「シラバス照会」ボタンの表記を「シラバス」に短縮（幅も詰める） */
+/* 「シラバス照会」ボタンの表記を「シラバス」に短縮（幅も詰める） */
 html.cit-top #portalSchedule2 .lessonBtnArea button:not(.cpBtn) .ui-button-text {
   font-size: 0 !important;
   padding: 4px 10px !important;
