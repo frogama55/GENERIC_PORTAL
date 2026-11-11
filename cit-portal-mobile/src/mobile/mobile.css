@@ -1,0 +1,437 @@
+/*
+ * NexPortal Mobile - スマホ向けの追加スタイル（mobile.css）
+ *
+ * restyle.css（Chrome 拡張版と共通の土台）の「あと」に読み込まれ，スマホで困る所だけを上書きする．
+ * restyle.css 本体はなるべく触らない（拡張版の更新を取り込みやすくするため）．
+ *
+ * 構成：
+ *   A. 設定ボタン・設定パネル（settings-panel.js が生成．自前UIなので常時スタイルする）
+ *   B. タッチ端末向けの添付ビューア（attachment.js が生成）
+ *   C. タッチ端末共通の調整（画面幅に関係なく効く）
+ *   D. 狭い画面（幅 700px 以下）向けのレイアウト調整
+ *
+ * 【注意】D はポータルの実機（スマホ）表示を確認しながら詰める前提の初期値．
+ *   ポータルの HTML 構造は docs/selectors.md（PC表示で調査）に基づいている．
+ */
+
+/* ===== A. 設定ボタン・設定パネル ===== */
+button.cit-set-fab.cit-set-fab {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right, 0px));
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  z-index: 2147482000; /* 添付ビューア(.cit-pdf-overlay)より背面 */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  color: #1f2933;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid #cbd2d9;
+  border-radius: 50% !important;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.22);
+  opacity: 0.7;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cit-set-fab:active {
+  opacity: 1;
+  background: #eef2f6;
+}
+@media print {
+  .cit-set-fab {
+    display: none !important;
+  }
+}
+
+.cit-set-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483002; /* ローディングカードより前面 */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 23, 32, 0.5);
+}
+.cit-set-sheet {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 520px;
+  max-height: 88vh;
+  max-height: 88dvh;
+  background: #fff;
+  color: #1f2933;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 24px rgba(16, 24, 40, 0.25);
+  font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+  animation: cit-set-up 0.2s ease-out;
+}
+@keyframes cit-set-up {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: none;
+  }
+}
+/* PCなど広い画面では中央のダイアログとして出す */
+@media (min-width: 701px) {
+  .cit-set-backdrop {
+    align-items: center;
+  }
+  .cit-set-sheet {
+    border-radius: 16px;
+  }
+}
+.cit-set-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e4e7eb;
+}
+.cit-set-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+button.cit-set-close.cit-set-close {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1558b0;
+  background: #eaf1fb;
+  border: none;
+  border-radius: 8px !important;
+  padding: 8px 14px;
+  min-height: 40px;
+  cursor: pointer;
+}
+.cit-set-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+.cit-set-disclaimer {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #7a4a00;
+  background: #fff6e5;
+  border: 1px solid #f0d99a;
+  border-radius: 8px;
+}
+.cit-set-section {
+  margin: 0 0 12px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid #e4e7eb;
+}
+.cit-set-section-title {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #7b8794;
+}
+.cit-set-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 0;
+  margin: 0;
+  cursor: pointer;
+  font-weight: 400;
+}
+.cit-set-row-indent {
+  margin-left: 34px;
+}
+.cit-set-check {
+  flex: 0 0 auto;
+  width: 22px !important;
+  height: 22px !important;
+  margin: 0 !important;
+  accent-color: #1558b0;
+}
+.cit-set-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.cit-set-label {
+  font-size: 15px;
+  color: #1f2933;
+}
+.cit-set-note {
+  font-size: 12px;
+  color: #7b8794;
+}
+.cit-set-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #52606d;
+}
+.cit-set-foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: #7b8794;
+}
+.cit-set-foot .cit-set-link,
+html.cit-restyle .cit-set-foot .cit-set-link {
+  color: #1558b0 !important;
+  text-decoration: none;
+}
+.cit-set-version {
+  margin-left: auto;
+}
+
+/* ===== B. タッチ端末向けの添付ビューア =====
+ * iOS Safari は iframe 内の PDF を1ページ目しか表示できないので，iframe の代わりに
+ * 「開く」「保存」の大きなボタン（画像はその場で表示）を出す．クラスは attachment.js が付ける． */
+.cit-pdf-overlay.cit-pdf-touch {
+  padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px));
+}
+.cit-pdf-touch .cit-pdf-bar {
+  padding: 8px 10px;
+}
+.cit-pdf-touch .cit-pdf-close {
+  min-height: 36px;
+  padding: 4px 14px;
+}
+.cit-pdf-touch-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 16px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  background: #fff;
+  border-radius: 0 0 8px 8px;
+}
+.cit-pdf-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+.cit-pdf-filecard {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  color: #52606d;
+}
+.cit-pdf-filecard .fa {
+  font-size: 44px;
+  color: #9aa5b1;
+}
+.cit-pdf-filecard-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2933;
+  word-break: break-all;
+}
+.cit-pdf-filecard-note {
+  margin: 0;
+  font-size: 13px;
+}
+.cit-pdf-touch-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 10px;
+}
+.cit-pdf-touch-actions .cit-pdf-btn {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 10px;
+}
+.cit-pdf-touch-actions .cit-pdf-btn-primary,
+html.cit-restyle .cit-pdf-touch-actions a.cit-pdf-btn-primary {
+  color: #fff !important;
+  background: #1558b0;
+  border-color: #1558b0;
+}
+
+/* ===== C. タッチ端末共通の調整 ===== */
+
+/* 横向きにしたときなどに iOS が文字サイズを勝手に拡大するのを止める */
+html.cit-restyle {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* iOS は 16px 未満の入力欄にフォーカスすると画面を自動ズームする．16px にして防ぐ */
+  html.cit-restyle input[type="text"],
+  html.cit-restyle input[type="password"],
+  html.cit-restyle input[type="search"],
+  html.cit-restyle select,
+  html.cit-restyle textarea,
+  .cit-term-select {
+    font-size: 16px !important;
+  }
+
+  /* 拡張が作るボタン類を指で押しやすい大きさに */
+  .cit-term-btn,
+  .cit-term-select {
+    min-height: 40px;
+  }
+  .cit-attach-quicklist-item {
+    min-height: 44px;
+    font-size: 15px;
+  }
+  .cit-relogin-btn {
+    padding: 14px 28px;
+    font-size: 16px;
+  }
+}
+
+/* ===== D. 狭い画面（幅 700px 以下）向けのレイアウト調整 ===== */
+@media (max-width: 700px) {
+  /* --- トップページのクイックランチャー：3列のグリッドに --- */
+  .cit-quicklaunch {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+  .cit-ql-btn {
+    min-width: 0;
+    min-height: 68px;
+    padding: 10px 4px;
+  }
+
+  /* --- 掲示一覧のカード：1行に詰め込まず，「カテゴリ・日付」→「タイトル（2行まで）」→「操作ボタン」 --- */
+  html.cit-restyle div.alignRight:has(> dl.keiji) {
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    padding: 10px 12px !important;
+  }
+  html.cit-restyle dl.keiji {
+    flex: 1 1 0;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  html.cit-restyle .keiji a.ui-commandlink {
+    order: 1; /* タイトルを最後（＝2行目）へ．日付のテキストは order:0 のまま1行目に残る */
+    flex: 1 1 100%;
+    white-space: normal;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.45 !important;
+  }
+  html.cit-restyle div.alignRight:has(> dl.keiji) > .inlineBlock {
+    flex: 1 1 100%;
+    text-align: right;
+  }
+
+  /* --- 掲示タブ：折り返さず横スクロール --- */
+  html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav {
+    display: flex !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav::-webkit-scrollbar {
+    display: none;
+  }
+  html.cit-restyle #funcForm\:tabArea > ul.ui-tabs-nav > li {
+    flex: 0 0 auto;
+    float: none !important;
+    white-space: nowrap;
+  }
+
+  /* --- 掲示の検索欄：横幅いっぱいに --- */
+  html.cit-restyle div.searchArea:has(#funcForm\:keyword) #funcForm\:keyword {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* --- 掲示詳細などのダイアログ：本文の高さを画面に収める（PCでは600px固定） --- */
+  html.cit-restyle .ui-dialog.rx-dialog .ui-dialog-content {
+    max-height: calc(100vh - 150px) !important;
+    max-height: calc(100dvh - 150px) !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  html.cit-restyle .ui-dialog {
+    max-width: 100vw !important;
+  }
+
+  /* --- 時間割：列を潰さず，表の中だけ横スクロールさせる --- */
+  html.cit-restyle .rishuArea .ofAuto {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  html.cit-restyle table.classTable {
+    min-width: 640px;
+  }
+
+  /* --- 出欠状況：左に固定する「授業科目」列を細くして，出欠マークの見える範囲を広げる --- */
+  html.cit-restyle .attendanceInfo table tr > th:nth-child(1),
+  html.cit-restyle .attendanceInfo table tr > td:nth-child(1) {
+    width: 3.6em !important;
+    min-width: 3.6em !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  html.cit-restyle .attendanceInfo table tr > th:nth-child(2),
+  html.cit-restyle .attendanceInfo table tr > td:nth-child(2) {
+    left: 3.6em;
+    width: 8.5em !important;
+    min-width: 8.5em !important;
+    white-space: normal !important;
+    word-break: break-all;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+  }
+
+  /* --- 学期の切り替えバー：幅に収める --- */
+  .cit-term-pager {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+  }
+  .cit-term-select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .cit-term-btn {
+    padding: 5px 10px;
+  }
+  /* --- 表のセル余白を少し詰める（横幅の節約） --- */
+  html.cit-restyle td,
+  html.cit-restyle th {
+    padding: 6px 6px !important;
+  }
+}

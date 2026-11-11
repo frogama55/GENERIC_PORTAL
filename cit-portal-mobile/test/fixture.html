@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexPortal Mobile 動作確認用の模擬ページ</title>
+<!--
+  ポータルにログインせずに，ビルドしたユーザースクリプトの基本動作（スタイル適用・設定パネル・
+  ローディング表示）を手元で確かめるための模擬ページ．docs/selectors.md の構造をまねた最小限のHTML．
+  実データは含まない．使い方：cit-portal-mobile で `python3 -m http.server 8765` → /test/fixture.html
+-->
+<script>
+  // ページ側 jQuery の最小限の代用品（page-bridge.js が購読できれば十分）
+  (function () {
+    const handlers = {};
+    function $() {
+      return {
+        on(names, fn) { names.split(" ").forEach((n) => (handlers[n] = handlers[n] || []).push(fn)); },
+        trigger(name) { (handlers[name] || []).forEach((fn) => fn()); },
+      };
+    }
+    $.fn = {};
+    window.jQuery = $;
+    window.fakeAjax = function (ms) {
+      $().trigger("pfAjaxSend");
+      setTimeout(() => $().trigger("pfAjaxComplete"), ms || 1200);
+    };
+  })();
+</script>
+<script src="../dist/nexportal-mobile.user.js"></script>
+</head>
+<body>
+<h2>掲示一覧（模擬）</h2>
+<div class="searchArea"><dl class="searchItem"><div class="searchItemRowBottom">
+  <dt>キーワード</dt><dd><input type="text" id="funcForm:keyword"></dd>
+  <dt class="searchItemCell">授業科目</dt><dd><input type="text" id="funcForm:jugyoKamoku"></dd>
+</div></dl><span class="btnSearchLocation"><button id="funcForm:search" type="button">検索</button></span></div>
+
+<div id="funcForm:tabArea"><ul class="ui-tabs-nav">
+  <li><a href="#">グループ</a></li><li><a href="#">全表示</a></li><li><a href="#">授業</a></li>
+  <li><a href="#">時間割変更</a></li><li><a href="#">既読</a></li><li><a href="#">未読</a></li>
+  <li><a href="#">新着</a></li><li><a href="#">重要</a></li><li><a href="#">申込</a></li><li><a href="#">フラグつき</a></li>
+</ul></div>
+
+<div class="alignRight"><dl class="keiji"><i class="fa iconColorAttention"></i><i class="fa iconColorNew hiddenStyle"></i>
+  <span class="keijiCategory">教務</span><a class="ui-commandlink ui-widget fontBold" href="#">【重要】模擬のお知らせ：とても長いタイトルがスマホの幅でどのように折り返されるかを確認するための文章です</a>2026/11/10</dl>
+  <span class="inlineBlock"><button type="button">フラグをつける</button> <button type="button">既読にする</button></span><div class="cf"></div><hr class="ui-separator"></div>
+<div class="alignRight"><dl class="keiji"><i class="fa iconColorAttention hiddenStyle"></i><i class="fa iconColorNew"></i>
+  <span class="keijiCategory">図書館</span><a class="ui-commandlink ui-widget " href="#">模擬のお知らせ（既読）</a>2026/11/08</dl>
+  <span class="inlineBlock"><button type="button">フラグをつける</button> <button type="button">未読にする</button></span><div class="cf"></div><hr class="ui-separator"></div>
+
+<p><button type="button" onclick="fakeAjax(1500)">模擬AJAX（1.5秒）</button></p>
+<table><tr><th>項目</th><td>値</td></tr><tr><th>項目2</th><td>値2</td></tr></table>
+<div style="height:900px"></div>
+</body>
+</html>
