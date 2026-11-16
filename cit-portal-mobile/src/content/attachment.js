@@ -9,7 +9,9 @@
 //   （Content-Disposition: attachment で強制DL）．この submit を横取りし，同じ内容を
 //   same-origin の fetch で取得 → blob 化 → ページ内オーバーレイの iframe(＝Chrome内蔵PDF
 //   ビューア) で表示する．「新しいタブで開く」「保存」も添える．取得中はスピナーを表示する．
-//   【スマホ版】タッチ端末では iframe を使わず，「開く」「保存」ボタン（画像はその場で表示）にする．
+//   【スマホ版】タッチ端末では，ファイル名をタップしたら新しいタブ（ブラウザ標準のビューア）で
+//   直接開く（iOS Safari はページ内の iframe では PDF を1ページ目しか表示できないため）．
+//   新しいタブを開けなかったときだけ，1ページ目のプレビュー＋「開く」「保存」ボタンの画面を出す．
 //
 //   加えて，掲示詳細ダイアログ内にある「添付資料を確認」相当の展開トリガを自動で1回だけ
 //   クリックして .fileListArea を出し，そこからファイル名一覧（.cit-attach-quicklist）を
@@ -65,6 +67,23 @@
       const form = e.target;
       if (!form || form.tagName !== "FORM") return;
       e.preventDefault();
+      // 【スマホ版】タッチ端末では，プレビュー画面を挟まず新しいタブ（ブラウザ標準のビューア．
+      // PDF も全ページ表示・拡大できる）で直接開く．タブを開けなかった場合だけ下の画面に進む．
+      if (IS_TOUCH) {
+        const win = openBlankTab();
+        if (win) {
+          openInTab(form, submitter, win).catch(() => {
+            try {
+              win.close();
+            } catch (_) {}
+            bypass = true;
+            try {
+              submitter.click();
+            } catch (_) {}
+          });
+          return;
+        }
+      }
       const overlay = createOverlay();
       previewDownload(form, submitter, overlay).catch(() => {
         // 失敗したら通常のダウンロードに戻す（同じ送信を素通しで再実行）
@@ -78,7 +97,8 @@
     true
   );
 
-  async function previewDownload(form, submitter, overlay) {
+  // 添付ファイルをポータルから取得する（ダウンロードのPOSTを same-origin の fetch で再現）
+  async function fetchAttachment(form, submitter) {
     const fd = new FormData(form);
     // 送信ボタンの name は FormData に自動で入らないので手で足す（JSFのコマンド判定に必要）
     if (submitter.name) fd.append(submitter.name, submitter.value || "");
@@ -94,7 +114,42 @@
     const filename =
       parseFilename(res.headers.get("Content-Disposition") || "") || "attachment";
     const blob = await res.blob();
+    return { blob, filename };
+  }
+
+  async function previewDownload(form, submitter, overlay) {
+    const { blob, filename } = await fetchAttachment(form, submitter);
     populateViewer(overlay, blob, filename);
+  }
+
+  // 【スマホ版】新しいタブで直接開く．
+  // ブラウザは「タップした瞬間」にしか新しいタブを開かせてくれない（取得が終わってから開こうとすると
+  // ポップアップとして止められる）ので，先に空のタブを開いておき，取得できたらそこへ表示する．
+  function openBlankTab() {
+    let win = null;
+    try {
+      win = window.open("", "_blank");
+    } catch (_) {
+      return null;
+    }
+    if (!win) return null;
+    try {
+      win.document.title = "読み込み中…";
+      win.document.body.textContent = "添付ファイルを読み込んでいます…";
+    } catch (_) {}
+    return win;
+  }
+
+  const tabUrls = []; // 新しいタブに渡した一時URL．このページを離れるときに解放する
+  window.addEventListener("pagehide", () => {
+    for (const u of tabUrls.splice(0)) URL.revokeObjectURL(u);
+  });
+
+  async function openInTab(form, submitter, win) {
+    const { blob, filename } = await fetchAttachment(form, submitter);
+    const url = URL.createObjectURL(typedBlob(blob, filename));
+    tabUrls.push(url);
+    win.location.replace(url);
   }
 
   // Content-Disposition から filename を取り出す（RFC5987 / RFC2047 に対応）

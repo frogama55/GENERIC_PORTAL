@@ -1,6 +1,6 @@
 {
   "name": "nexportal-mobile",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "NexPortal のスマホ版（ユーザースクリプト）．node build.mjs で dist/ に出力する．",
   "type": "module",

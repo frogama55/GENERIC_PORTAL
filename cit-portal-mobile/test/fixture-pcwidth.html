@@ -20,6 +20,21 @@
     }
     $.fn = {};
     window.jQuery = $;
+    // 添付ファイル取得（POST）の代用：どんな POST にも小さな PDF もどきを返す
+    const realFetch = window.fetch.bind(window);
+    window.fetch = function (url, opt) {
+      if (!opt || opt.method !== "POST") return realFetch(url, opt);
+      window.lastPost = String(opt.body);
+      return Promise.resolve(
+        new Response(new Blob(["%PDF-1.4 mock"], { type: "application/octet-stream" }), {
+          status: 200,
+          headers: {
+            "Content-Type": "application/octet-stream",
+            "Content-Disposition": "attachment; filename*=UTF-8''%E6%A8%A1%E6%93%AC.pdf",
+          },
+        })
+      );
+    };
     window.fakeAjax = function (ms) {
       $().trigger("pfAjaxSend");
       setTimeout(() => $().trigger("pfAjaxComplete"), ms || 1200);
@@ -47,6 +62,13 @@
 <div class="alignRight"><dl class="keiji"><i class="fa iconColorAttention hiddenStyle"></i><i class="fa iconColorNew"></i>
   <span class="keijiCategory">図書館</span><a class="ui-commandlink ui-widget " href="#">模擬のお知らせ（既読）</a>2026/11/08</dl>
   <span class="inlineBlock"><button type="button">フラグをつける</button> <button type="button">未読にする</button></span><div class="cf"></div><hr class="ui-separator"></div>
+
+<h2>添付一覧（模擬）</h2>
+<form action="fixture.html" method="post"><input type="hidden" name="javax.faces.ViewState" value="mock">
+<div class="fileListArea"><div class="tableDownloadRow">
+  <div class="downLoadCellFilNm">模擬.pdf(12KB)</div>
+  <div class="fileListCell alignRight"><button type="submit" name="dl0" value="go">ダウンロード</button></div>
+</div></div></form>
 
 <p><button type="button" onclick="fakeAjax(1500)">模擬AJAX（1.5秒）</button></p>
 <table><tr><th>項目</th><td>値</td></tr><tr><th>項目2</th><td>値2</td></tr></table>
