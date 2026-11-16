@@ -67,7 +67,7 @@
 <form action="fixture.html" method="post"><input type="hidden" name="javax.faces.ViewState" value="mock">
 <div class="fileListArea"><div class="tableDownloadRow">
   <div class="downLoadCellFilNm">模擬.pdf(12KB)</div>
-  <div class="fileListCell alignRight"><button type="submit" name="dl0" value="go">ダウンロード</button></div>
+  <div class="fileListCell alignRight"><button type="button" onclick="var b=this.nextElementSibling;setTimeout(function(){b.click()},1200)">ダウンロード</button><button type="submit" class="dispNone" style="display:none" name="dl0" value="go">実送信</button></div>
 </div></div></form>
 
 <p><button type="button" onclick="fakeAjax(1500)">模擬AJAX（1.5秒）</button></p>

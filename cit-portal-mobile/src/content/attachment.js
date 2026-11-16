@@ -69,20 +69,16 @@
       e.preventDefault();
       // 【スマホ版】タッチ端末では，プレビュー画面を挟まず新しいタブ（ブラウザ標準のビューア．
       // PDF も全ページ表示・拡大できる）で直接開く．タブを開けなかった場合だけ下の画面に進む．
-      if (IS_TOUCH) {
-        const win = openBlankTab();
-        if (win) {
-          openInTab(form, submitter, win).catch(() => {
-            try {
-              win.close();
-            } catch (_) {}
-            bypass = true;
-            try {
-              submitter.click();
-            } catch (_) {}
-          });
-          return;
-        }
+      const tab = IS_TOUCH ? takePendingTab() || openBlankTab() : null;
+      if (tab) {
+        openInTab(form, submitter, tab).catch(() => {
+          tab.close();
+          bypass = true;
+          try {
+            submitter.click();
+          } catch (_) {}
+        });
+        return;
       }
       const overlay = createOverlay();
       previewDownload(form, submitter, overlay).catch(() => {
@@ -123,21 +119,68 @@
   }
 
   // 【スマホ版】新しいタブで直接開く．
-  // ブラウザは「タップした瞬間」にしか新しいタブを開かせてくれない（取得が終わってから開こうとすると
-  // ポップアップとして止められる）ので，先に空のタブを開いておき，取得できたらそこへ表示する．
+  // ブラウザは「指でタップした瞬間」にしか新しいタブを開かせてくれない．ポータルのダウンロードボタンは
+  // 押してから送信までに通信を挟むことがあり，送信の時点ではもうタブを開けない（iPhone 実機で確認）．
+  // そこで，クイック一覧のファイル名をタップした瞬間に空のタブを先に開いて「予約」しておき
+  // （armPendingTab），あとで送信を横取りしたときにそのタブへ表示する（takePendingTab）．
+  //
+  // タブの開き方は2通り試す：
+  //   1) このスクリプトから直接 window.open
+  //   2) だめなら，ページ側の世界で動く page-bridge.js に合図（cit-tab-open）を送って開いてもらう
+  //      （ユーザースクリプトの世界からは開けないブラウザがあるため）
+  // どちらも戻り値は { go(url), close() }．開けなければ null．
   function openBlankTab() {
     let win = null;
     try {
       win = window.open("", "_blank");
-    } catch (_) {
-      return null;
-    }
-    if (!win) return null;
-    try {
-      win.document.title = "読み込み中…";
-      win.document.body.textContent = "添付ファイルを読み込んでいます…";
     } catch (_) {}
-    return win;
+    if (win) {
+      try {
+        win.document.title = "読み込み中…";
+        win.document.body.textContent = "添付ファイルを読み込んでいます…";
+      } catch (_) {}
+      return {
+        go: (url) => win.location.replace(url),
+        close: () => {
+          try {
+            win.close();
+          } catch (_) {}
+        },
+      };
+    }
+    const root = document.documentElement;
+    root.removeAttribute("data-cit-tab");
+    document.dispatchEvent(new CustomEvent("cit-tab-open")); // 同期で処理され，結果が属性に入る
+    if (root.getAttribute("data-cit-tab") !== "1") return null;
+    return {
+      go: (url) => {
+        root.setAttribute("data-cit-tab-url", url);
+        document.dispatchEvent(new CustomEvent("cit-tab-go"));
+      },
+      close: () => document.dispatchEvent(new CustomEvent("cit-tab-close")),
+    };
+  }
+
+  const PENDING_TAB_MS = 20000; // 予約したタブを待たせる上限．過ぎたら閉じる
+  let pendingTab = null;
+  let pendingTimer = null;
+
+  function armPendingTab() {
+    dropPendingTab();
+    pendingTab = openBlankTab();
+    if (pendingTab) pendingTimer = setTimeout(dropPendingTab, PENDING_TAB_MS);
+  }
+
+  function takePendingTab() {
+    const tab = pendingTab;
+    pendingTab = null;
+    clearTimeout(pendingTimer);
+    return tab;
+  }
+
+  function dropPendingTab() {
+    const tab = takePendingTab();
+    if (tab) tab.close();
   }
 
   const tabUrls = []; // 新しいタブに渡した一時URL．このページを離れるときに解放する
@@ -145,11 +188,11 @@
     for (const u of tabUrls.splice(0)) URL.revokeObjectURL(u);
   });
 
-  async function openInTab(form, submitter, win) {
+  async function openInTab(form, submitter, tab) {
     const { blob, filename } = await fetchAttachment(form, submitter);
     const url = URL.createObjectURL(typedBlob(blob, filename));
     tabUrls.push(url);
-    win.location.replace(url);
+    tab.go(url);
   }
 
   // Content-Disposition から filename を取り出す（RFC5987 / RFC2047 に対応）
@@ -459,7 +502,11 @@
       row.innerHTML = '<i class="fa fa-file-o" aria-hidden="true"></i><span class="cit-attach-name"></span>';
       row.querySelector(".cit-attach-name").textContent = item.name;
       row.title = item.name;
-      row.addEventListener("click", () => item.btn.click());
+      row.addEventListener("click", () => {
+        // 【スマホ版】タップした瞬間に，表示先の空タブを予約しておく（理由は openBlankTab の説明）
+        if (IS_TOUCH && masterEnabled && featureEnabled) armPendingTab();
+        item.btn.click();
+      });
       box.appendChild(row);
     }
 
