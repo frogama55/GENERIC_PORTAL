@@ -17,24 +17,25 @@
 /* ===== A. 設定ボタン・設定パネル ===== */
 button.cit-set-fab.cit-set-fab {
   position: fixed;
+  zoom: var(--cit-ui-scale, 1); /* 縮小表示のページでも指で押せる大きさに（inject.js が設定） */
   right: calc(12px + env(safe-area-inset-right, 0px));
   bottom: calc(12px + env(safe-area-inset-bottom, 0px));
   z-index: 2147482000; /* 添付ビューア(.cit-pdf-overlay)より背面 */
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   padding: 0;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 26px;
   line-height: 1;
   color: #1f2933;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #cbd2d9;
   border-radius: 50% !important;
   box-shadow: 0 2px 8px rgba(16, 24, 40, 0.22);
-  opacity: 0.7;
+  opacity: 0.9;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -62,7 +63,7 @@ button.cit-set-fab.cit-set-fab {
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 520px;
+  max-width: calc(520px * var(--cit-ui-scale, 1));
   max-height: 88vh;
   max-height: 88dvh;
   background: #fff;
@@ -93,6 +94,7 @@ button.cit-set-fab.cit-set-fab {
   }
 }
 .cit-set-head {
+  zoom: var(--cit-ui-scale, 1);
   flex: 0 0 auto;
   display: flex;
   align-items: center;
@@ -118,7 +120,9 @@ button.cit-set-close.cit-set-close {
   cursor: pointer;
 }
 .cit-set-body {
+  zoom: var(--cit-ui-scale, 1);
   flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -207,6 +211,7 @@ html.cit-restyle .cit-set-foot .cit-set-link {
   padding: calc(8px + env(safe-area-inset-top, 0px)) 8px calc(8px + env(safe-area-inset-bottom, 0px));
 }
 .cit-pdf-touch .cit-pdf-bar {
+  zoom: var(--cit-ui-scale, 1);
   padding: 8px 10px;
 }
 .cit-pdf-touch .cit-pdf-close {
@@ -219,8 +224,8 @@ html.cit-restyle .cit-set-foot .cit-set-link {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: 12px;
-  padding: 16px;
+  gap: 8px;
+  padding: 8px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
@@ -233,32 +238,23 @@ html.cit-restyle .cit-set-foot .cit-set-link {
   height: auto;
   margin: 0 auto;
 }
-.cit-pdf-filecard {
+.cit-pdf-touch-frame {
   flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  text-align: center;
+  min-height: 0;
+  border: 1px solid #e1e6ea;
+  border-radius: 8px;
+}
+.cit-pdf-touch-note {
+  flex: 0 0 auto;
+  zoom: var(--cit-ui-scale, 1);
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
   color: #52606d;
-}
-.cit-pdf-filecard .fa {
-  font-size: 44px;
-  color: #9aa5b1;
-}
-.cit-pdf-filecard-name {
-  margin: 0;
-  font-size: 15px;
-  font-weight: 600;
-  color: #1f2933;
-  word-break: break-all;
-}
-.cit-pdf-filecard-note {
-  margin: 0;
-  font-size: 13px;
+  text-align: center;
 }
 .cit-pdf-touch-actions {
+  zoom: var(--cit-ui-scale, 1);
   flex: 0 0 auto;
   display: flex;
   gap: 10px;
@@ -278,6 +274,16 @@ html.cit-restyle .cit-pdf-touch-actions a.cit-pdf-btn-primary {
   color: #fff !important;
   background: #1558b0;
   border-color: #1558b0;
+}
+
+/* クイック一覧を出せたら「添付資料を確認」ボタンは隠す（attachment.js が付ける） */
+.cit-attach-trigger-done {
+  display: none !important;
+}
+
+/* 読み込み中カードも縮小表示に合わせて拡大する */
+.cit-loading-box {
+  zoom: var(--cit-ui-scale, 1);
 }
 
 /* ===== C. タッチ端末共通の調整 ===== */

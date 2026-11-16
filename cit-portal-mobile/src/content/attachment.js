@@ -226,14 +226,17 @@
         img.src = url;
         body.appendChild(img);
       } else {
-        const card = document.createElement("div");
-        card.className = "cit-pdf-filecard";
-        card.innerHTML =
-          '<i class="fa fa-file-o" aria-hidden="true"></i>' +
-          '<p class="cit-pdf-filecard-name"></p>' +
-          '<p class="cit-pdf-filecard-note">「開く」を押すと新しいタブで表示します．</p>';
-        card.querySelector(".cit-pdf-filecard-name").textContent = filename;
-        body.appendChild(card);
+        // PDF などはその場で iframe に表示する．iOS Safari は iframe 内の PDF を1ページ目しか
+        // 表示できないことがあるので，下に「開く（新しいタブ）」ボタンと案内も必ず添える．
+        const frame = document.createElement("iframe");
+        frame.className = "cit-pdf-frame cit-pdf-touch-frame";
+        frame.title = "添付プレビュー";
+        frame.src = url;
+        body.appendChild(frame);
+        const note = document.createElement("p");
+        note.className = "cit-pdf-touch-note";
+        note.textContent = "1ページ目しか表示されない・動かせない場合は「開く」を押してください．";
+        body.appendChild(note);
       }
 
       const row = document.createElement("div");
@@ -348,6 +351,13 @@
     return items;
   }
 
+  // 【スマホ版】クイック一覧を出せたら，役目が重なる「添付資料を確認」ボタンは隠す．
+  // （押しても，不可視にしている添付一覧ダイアログが再読み込みされるだけで何も起きないように見えるため）
+  // 一覧を作れなかった場合はボタンが残るので，本来の手順で添付を開ける．
+  function hideTrigger() {
+    if (lastTrigger && lastTrigger.isConnected) lastTrigger.classList.add("cit-attach-trigger-done");
+  }
+
   function buildQuickList(fileListArea) {
     const items = collectFileRows(fileListArea);
     if (!items.length) return;
@@ -372,6 +382,7 @@
       ? fileListArea.nextElementSibling
       : null;
     if (existing && existing.dataset.sig === sig) {
+      hideTrigger();
       unsuppress();
       return;
     }
@@ -399,6 +410,7 @@
 
     if (host) host.appendChild(box);
     else fileListArea.insertAdjacentElement("afterend", box);
+    hideTrigger();
     unsuppress();
   }
 
