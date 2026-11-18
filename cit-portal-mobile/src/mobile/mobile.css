@@ -286,6 +286,43 @@ html.cit-restyle .cit-pdf-touch-actions a.cit-pdf-btn-primary {
   zoom: var(--cit-ui-scale, 1);
 }
 
+/* ダイアログ（掲示詳細・シラバスなど）の大きな「閉じる」ボタン（dialog-close.js が生成）．
+ * タイトルバーの右端に置き，元の小さな × は隠す（押せないので紛らわしいだけ）． */
+.ui-dialog-titlebar.cit-dlg-bar {
+  position: relative;
+  min-height: calc(44px * var(--cit-ui-scale, 1));
+  display: flex !important;
+  align-items: center;
+}
+.ui-dialog-titlebar.cit-dlg-bar > .ui-dialog-titlebar-icon {
+  display: none !important;
+}
+button.cit-dlg-close.cit-dlg-close {
+  zoom: var(--cit-ui-scale, 1);
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  margin: 0;
+  padding: 0 14px;
+  min-height: 36px;
+  font: 600 15px/1 "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  color: #1f2933;
+  background: #fff;
+  border: 1px solid #cbd2d9;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.2);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+button.cit-dlg-close.cit-dlg-close:active {
+  background: #eef2f6;
+}
+button.cit-dlg-close[hidden] {
+  display: none !important;
+}
+
 /* ===== C. タッチ端末共通の調整 ===== */
 
 /* 横向きにしたときなどに iOS が文字サイズを勝手に拡大するのを止める */

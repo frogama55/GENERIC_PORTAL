@@ -70,6 +70,15 @@
   <div class="fileListCell alignRight"><button type="button" onclick="var b=this.nextElementSibling;setTimeout(function(){b.click()},1200)">ダウンロード</button><button type="submit" class="dispNone" style="display:none" name="dl0" value="go">実送信</button></div>
 </div></div></form>
 
+<div class="ui-dialog rx-dialog" id="mockdlg" style="position:fixed;left:2%;top:120px;width:96%;background:#fff;border:1px solid #999;z-index:1000">
+  <div class="ui-dialog-titlebar" style="background:#333;color:#fff;padding:4px 8px">
+    <span class="ui-dialog-title">掲示内容</span>
+    <a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-maximize" style="float:right;color:#fff;font-size:9px">□</a>
+    <a href="#" class="ui-dialog-titlebar-icon ui-dialog-titlebar-close" style="float:right;color:#fff;font-size:9px" onclick="document.getElementById('mockdlg').style.display='none';return false">×</a>
+  </div>
+  <div class="ui-dialog-content" style="padding:8px">模擬ダイアログの本文</div>
+</div>
+
 <p><button type="button" onclick="fakeAjax(1500)">模擬AJAX（1.5秒）</button></p>
 <table><tr><th>項目</th><td>値</td></tr><tr><th>項目2</th><td>値2</td></tr></table>
 <div style="height:900px"></div>

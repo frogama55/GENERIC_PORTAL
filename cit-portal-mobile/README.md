@@ -62,6 +62,7 @@ cit-portal-mobile/
       inject.js            … CSS とページ側ブリッジを差し込む（拡張版の manifest.json の役割）
       page-bridge.js       … ページ側で動く小さなスクリプト（拡張版の loading-bridge.js）
       settings-panel.js    … ページ内の設定パネル（拡張版の設定ポップアップの代わり）
+      dialog-close.js      … ダイアログの大きな「閉じる」ボタン（タッチ端末のみ）
       mobile.css           … スマホ向けの追加スタイル
   test/fixture.html        … ログインなしで基本動作を確かめる模擬ページ
   docs/                    … 要素調査・セキュリティ設計メモ

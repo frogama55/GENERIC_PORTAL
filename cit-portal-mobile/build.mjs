@@ -40,6 +40,7 @@ const JS_FILES = [
   "src/content/grades.js",
   "src/content/timetable.js",
   "src/content/attendance.js",
+  "src/mobile/dialog-close.js", // ダイアログの大きな「閉じる」ボタン
   "src/mobile/settings-panel.js", // ページ内の設定パネル
 ];
 const UNWRAPPED = new Set(["src/mobile/shim.js"]);
